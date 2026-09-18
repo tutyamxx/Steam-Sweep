@@ -12,7 +12,6 @@
 		"build:dir": "npm run build && electron-builder --win --dir",
 		"build:portable": "npm run build && electron-builder --win portable",
 		"build:installer": "npm run build && electron-builder",
-		"electron": "electron .",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"stylelint": "stylelint \"src/**/*.css\"",
