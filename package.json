@@ -9,6 +9,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -p tsconfig.app.json && vite build",
+		"dist:dir": "npm run build && electron-builder --win --dir",
 		"electron": "electron .",
 		"dist": "npm run build && electron-builder",
 		"lint": "eslint .",
