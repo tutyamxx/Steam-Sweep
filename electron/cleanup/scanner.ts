@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import type { SteamGame } from '../steam/games.js';
 import type { CleanupCandidate } from './types.js';
 import {
@@ -14,6 +15,70 @@ import {
     temporaryDirectoryNames,
     temporaryExtensions
 } from './rules.js';
+
+const fileRules: {
+    extensions: string[];
+    type: CleanupCandidate['type'];
+    confidence: CleanupCandidate['confidence'];
+    reason: string;
+}[] = [
+    {
+        extensions: temporaryExtensions,
+        type: 'temp-file',
+        confidence: 'safe',
+        reason: 'Temporary file inside a Steam game installation.'
+    },
+    {
+        extensions: crashDumpExtensions,
+        type: 'crash-dump',
+        confidence: 'safe',
+        reason: 'Crash dump inside a Steam game installation.'
+    },
+    {
+        extensions: logExtensions,
+        type: 'log',
+        confidence: 'review',
+        reason: 'Log file inside a Steam game installation.'
+    },
+    {
+        extensions: backupExtensions,
+        type: 'backup',
+        confidence: 'review',
+        reason: 'Backup file inside a Steam game installation.'
+    }
+];
+
+const directoryRules: {
+    names: string[];
+    type: CleanupCandidate['type'];
+    confidence: CleanupCandidate['confidence'];
+    reason: string;
+}[] = [
+    {
+        names: temporaryDirectoryNames,
+        type: 'temp-folder',
+        confidence: 'safe',
+        reason: 'Temporary directory inside a Steam game installation.'
+    },
+    {
+        names: logDirectoryNames,
+        type: 'log',
+        confidence: 'review',
+        reason: 'Log directory inside a Steam game installation.'
+    },
+    {
+        names: crashDirectoryNames,
+        type: 'crash-dump',
+        confidence: 'review',
+        reason: 'Crash report directory inside a Steam game installation.'
+    },
+    {
+        names: installerDirectoryNames,
+        type: 'installer',
+        confidence: 'review',
+        reason: 'Directory commonly used for installers or redistributables.'
+    }
+];
 
 /**
  * Scans an installed Steam game for potentially unnecessary files and folders.
@@ -31,14 +96,14 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
     }
 
     /**
-	 * Adds a cleanup candidate to the result list.
-	 *
-	 * @param candidatePath - Absolute path to the candidate.
-	 * @param type - Cleanup candidate type.
-	 * @param size - Candidate size in bytes.
-	 * @param confidence - Candidate confidence level.
-	 * @param reason - Explanation shown to the user.
-	 */
+     * Adds a cleanup candidate to the result list.
+     *
+     * @param candidatePath - Absolute path to the candidate.
+     * @param type - Cleanup candidate type.
+     * @param size - Candidate size in bytes.
+     * @param confidence - Candidate confidence level.
+     * @param reason - Explanation shown to the user.
+     */
     const addCandidate = (
         candidatePath: string,
         type: CleanupCandidate['type'],
@@ -59,84 +124,60 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
     };
 
     /**
-	 * Processes a discovered file.
-	 *
-	 * @param fileName - Filename.
-	 * @param filePath - Absolute path to the file.
-	 */
+     * Processes a discovered file.
+     *
+     * @param fileName - Filename.
+     * @param filePath - Absolute path to the file.
+     */
     const scanFileEntry = (fileName: string, filePath: string): void => {
         const lowerCaseName = fileName.toLowerCase();
         const extension = path.extname(lowerCaseName);
+        const size = getFileSize(filePath);
 
-        if (temporaryExtensions.includes(extension)) {
-            addCandidate(filePath, 'temp-file', getFileSize(filePath), 'safe', 'Temporary file inside a Steam game installation.');
-
+        if (size === null) {
             return;
         }
 
-        if (crashDumpExtensions.includes(extension)) {
-            addCandidate(filePath, 'crash-dump', getFileSize(filePath), 'safe', 'Crash dump inside a Steam game installation.');
+        const rule = fileRules.find((fileRule) => fileRule.extensions.includes(extension));
 
-            return;
-        }
-
-        if (logExtensions.includes(extension)) {
-            addCandidate(filePath, 'log', getFileSize(filePath), 'review', 'Log file inside a Steam game installation.');
-
-            return;
-        }
-
-        if (backupExtensions.includes(extension)) {
-            addCandidate(filePath, 'backup', getFileSize(filePath), 'review', 'Backup file inside a Steam game installation.');
+        if (rule) {
+            addCandidate(filePath, rule.type, size, rule.confidence, rule.reason);
 
             return;
         }
 
         if (installerPatterns.some((pattern) => pattern.test(lowerCaseName))) {
-            addCandidate(filePath, 'installer', getFileSize(filePath), 'review', 'Executable appears to be a standalone installer.');
+            addCandidate(filePath, 'installer', size, 'review', 'Executable appears to be a standalone installer.');
 
             return;
         }
 
         if (installerArchivePatterns.some((pattern) => pattern.test(lowerCaseName))) {
-            addCandidate(filePath, 'installer', getFileSize(filePath), 'review', 'File appears to be a bundled installer or redistributable.');
+            addCandidate(filePath, 'installer', size, 'review', 'File appears to be a bundled installer or redistributable.');
         }
     };
 
     /**
-	 * Processes a discovered directory.
-	 *
-	 * @param entry - Filesystem directory entry.
-	 * @param directoryPath - Absolute path to the directory.
-	 */
+     * Processes a discovered directory.
+     *
+     * @param entry - Filesystem directory entry.
+     * @param directoryPath - Absolute path to the directory.
+     */
     const scanDirectoryEntry = (entry: fs.Dirent, directoryPath: string): void => {
         const directoryName = entry.name.toLowerCase();
+        const rule = directoryRules.find((directoryRule) => directoryRule.names.includes(directoryName));
 
-        if (temporaryDirectoryNames.includes(directoryName)) {
-            addCandidate(directoryPath, 'temp-folder', getDirectorySize(directoryPath), 'safe', 'Temporary directory inside a Steam game installation.');
+        if (rule) {
+            const size = getDirectorySize(directoryPath);
 
-            return;
-        }
-
-        if (logDirectoryNames.includes(directoryName)) {
-            addCandidate(directoryPath, 'log', getDirectorySize(directoryPath), 'review', 'Log directory inside a Steam game installation.');
-
-            return;
-        }
-
-        if (crashDirectoryNames.includes(directoryName)) {
-            addCandidate(directoryPath, 'crash-dump', getDirectorySize(directoryPath), 'review', 'Crash report directory inside a Steam game installation.');
+            if (size !== null) {
+                addCandidate(directoryPath, rule.type, size, rule.confidence, rule.reason);
+            }
 
             return;
         }
 
-        if (installerDirectoryNames.includes(directoryName)) {
-            addCandidate(directoryPath, 'installer', getDirectorySize(directoryPath), 'review', 'Directory commonly used for installers or redistributables.');
-
-            return;
-        }
-
-        if (isDirectoryEmpty(directoryPath)) {
+        if (isDirectoryEmpty(directoryPath) && !isDirectoryReadOnly(directoryPath)) {
             addCandidate(directoryPath, 'empty-folder', 0, 'safe', 'Empty directory inside a Steam game installation.');
 
             return;
@@ -146,10 +187,10 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
     };
 
     /**
-	 * Recursively scans a directory.
-	 *
-	 * @param directoryPath - Absolute path to the directory.
-	 */
+     * Recursively scans a directory.
+     *
+     * @param directoryPath - Absolute path to the directory.
+     */
     const scanDirectory = (directoryPath: string): void => {
         let entries: fs.Dirent[];
 
@@ -188,13 +229,13 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
  * Calculates the size of a file.
  *
  * @param filePath - Absolute path to the file.
- * @returns File size in bytes, or zero if it cannot be read.
+ * @returns File size in bytes, or `null` if the file cannot be read.
  */
-const getFileSize = (filePath: string): number => {
+const getFileSize = (filePath: string): number | null => {
     try {
         return fs.statSync(filePath).size;
     } catch {
-        return 0;
+        return null;
     }
 };
 
@@ -202,9 +243,9 @@ const getFileSize = (filePath: string): number => {
  * Calculates the total size of a directory recursively.
  *
  * @param directoryPath - Absolute path to the directory.
- * @returns Total size of all files below the directory.
+ * @returns Total size of all files below the directory, or `null` if the directory cannot be read.
  */
-const getDirectorySize = (directoryPath: string): number => {
+const getDirectorySize = (directoryPath: string): number | null => {
     let totalSize = 0;
 
     try {
@@ -220,16 +261,28 @@ const getDirectorySize = (directoryPath: string): number => {
             }
 
             if (entry.isDirectory()) {
-                totalSize += getDirectorySize(entryPath);
+                const size = getDirectorySize(entryPath);
+
+                if (size === null) {
+                    return null;
+                }
+
+                totalSize += size;
                 continue;
             }
 
             if (entry.isFile()) {
-                totalSize += getFileSize(entryPath);
+                const size = getFileSize(entryPath);
+
+                if (size === null) {
+                    return null;
+                }
+
+                totalSize += size;
             }
         }
     } catch {
-        return totalSize;
+        return null;
     }
 
     return totalSize;
@@ -244,6 +297,26 @@ const getDirectorySize = (directoryPath: string): number => {
 const isDirectoryEmpty = (directoryPath: string): boolean => {
     try {
         return fs.readdirSync(directoryPath).length === 0;
+    } catch {
+        return false;
+    }
+};
+
+/**
+ * Checks whether a directory has the Windows read-only attribute.
+ *
+ * @param directoryPath - Absolute path to the directory.
+ * @returns True when the directory has the read-only attribute.
+ */
+const isDirectoryReadOnly = (directoryPath: string): boolean => {
+    try {
+        const output = execFileSync('attrib', [directoryPath], {
+            encoding: 'utf8',
+            windowsHide: true
+        });
+        const attributes = output.trim().split(/\s+/)[0] ?? '';
+
+        return attributes.toUpperCase().includes('R');
     } catch {
         return false;
     }

@@ -21,7 +21,9 @@ dist/
 dist-electron/
 release/
 out/
-build/
+# Application assets
+build/*
+!build/icon.ico
 
 # Coverage
 coverage/

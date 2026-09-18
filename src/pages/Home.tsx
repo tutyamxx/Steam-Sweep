@@ -271,10 +271,7 @@ const Home = () => {
                     >
                         <div className='cleanup-progress-spinner' />
                         <h2>Moving files to Recycle Bin...</h2>
-                        <p>
-                            Moving {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} ({formatBytes(selectedSize)})
-                        </p>
-                        <span>Please wait...</span>
+                        <span>Deleting {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} ({formatBytes(selectedSize)})</span>
                     </div>
                 </div>
             )}
