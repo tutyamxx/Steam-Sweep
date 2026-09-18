@@ -22,6 +22,9 @@
 	"build": {
 		"appId": "com.steamsweep.app",
 		"productName": "SteamSweep",
+		"directories": {
+			"output": "release"
+		},
 		"files": [
 			"dist/**/*",
 			"dist-electron/**/*",
@@ -34,6 +37,7 @@
 			}
 		],
 		"asar": true,
+		"compression": "maximum",
 		"npmRebuild": false,
 		"win": {
 			"target": "nsis",
