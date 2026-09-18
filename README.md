@@ -1,5 +1,9 @@
 # Steam Sweep 🧹
 
+<p align="center">
+	<img src="steamsweep.gif" alt="SteamSweep demo">
+</p>
+
 - A lightweight Windows desktop utility for finding unnecessary leftover files in your Steam game libraries. 🎮
 - Steam Sweep scans installed Steam games for files and folders that may no longer be needed, helping you identify clutter and reclaim disk space. 💾
 
