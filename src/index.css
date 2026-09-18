@@ -10,6 +10,7 @@
 
 * {
 	box-sizing: border-box;
+	user-select: none;
 }
 
 html,
@@ -580,7 +581,8 @@ button {
 	font-size: 10px;
 	line-height: 1.4;
 	overflow-wrap: anywhere;
-	cursor: default;
+	cursor: text;
+	user-select: text;
 }
 
 .candidate-size {
@@ -596,7 +598,7 @@ button {
 	bottom: 28px;
 	height: 34px;
 	padding: 0 13px;
-	border: 1px solid #2a475e;
+	border: 2px solid #66c0f4;
 	border-radius: 4px;
 	background: #1b2838;
 	color: #c7d5e0;
@@ -607,13 +609,15 @@ button {
 	transition:
 		background 0.15s ease,
 		border-color 0.15s ease,
-		color 0.15s ease;
+		color 0.15s ease,
+		transform 0.15s ease;
 }
 
 .back-to-top:hover {
-	border-color: #66c0f4;
+	border-color: #7ccaf5;
 	background: #223247;
 	color: #fff;
+	transform: translateY(-1px);
 }
 
 .footer {
