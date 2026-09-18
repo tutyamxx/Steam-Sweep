@@ -70,26 +70,31 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
 
         if (temporaryExtensions.includes(extension)) {
             addCandidate(filePath, 'temp-file', getFileSize(filePath), 'safe', 'Temporary file inside a Steam game installation.');
+
             return;
         }
 
         if (crashDumpExtensions.includes(extension)) {
             addCandidate(filePath, 'crash-dump', getFileSize(filePath), 'safe', 'Crash dump inside a Steam game installation.');
+
             return;
         }
 
         if (logExtensions.includes(extension)) {
             addCandidate(filePath, 'log', getFileSize(filePath), 'review', 'Log file inside a Steam game installation.');
+
             return;
         }
 
         if (backupExtensions.includes(extension)) {
             addCandidate(filePath, 'backup', getFileSize(filePath), 'review', 'Backup file inside a Steam game installation.');
+
             return;
         }
 
         if (installerPatterns.some((pattern) => pattern.test(lowerCaseName))) {
             addCandidate(filePath, 'installer', getFileSize(filePath), 'review', 'Executable appears to be a standalone installer.');
+
             return;
         }
 
@@ -109,26 +114,31 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
 
         if (temporaryDirectoryNames.includes(directoryName)) {
             addCandidate(directoryPath, 'temp-folder', getDirectorySize(directoryPath), 'safe', 'Temporary directory inside a Steam game installation.');
+
             return;
         }
 
         if (logDirectoryNames.includes(directoryName)) {
             addCandidate(directoryPath, 'log', getDirectorySize(directoryPath), 'review', 'Log directory inside a Steam game installation.');
+
             return;
         }
 
         if (crashDirectoryNames.includes(directoryName)) {
             addCandidate(directoryPath, 'crash-dump', getDirectorySize(directoryPath), 'review', 'Crash report directory inside a Steam game installation.');
+
             return;
         }
 
         if (installerDirectoryNames.includes(directoryName)) {
             addCandidate(directoryPath, 'installer', getDirectorySize(directoryPath), 'review', 'Directory commonly used for installers or redistributables.');
+
             return;
         }
 
         if (isDirectoryEmpty(directoryPath)) {
             addCandidate(directoryPath, 'empty-folder', 0, 'safe', 'Empty directory inside a Steam game installation.');
+
             return;
         }
 
@@ -170,6 +180,7 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
     };
 
     scanDirectory(game.installPath);
+
     return candidates;
 };
 

@@ -29,4 +29,26 @@ interface CleanupCandidate {
 	reason: string;
 }
 
-export type { CleanupCandidate, CleanupType, Confidence };
+/**
+ * Represents the result of attempting to clean one candidate.
+ */
+interface CleanupCandidateResult {
+	id: string;
+	success: boolean;
+	error?: string;
+}
+
+/**
+ * Represents the result of a cleanup operation.
+ */
+interface CleanupResult {
+	results: CleanupCandidateResult[];
+}
+
+export type {
+    CleanupCandidate,
+    CleanupCandidateResult,
+    CleanupResult,
+    CleanupType,
+    Confidence
+};

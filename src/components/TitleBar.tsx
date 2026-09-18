@@ -38,4 +38,5 @@ const TitleBar = ({ onMinimize, onClose }: TitleBarProps) => {
 };
 
 export { TitleBar };
+
 export type { TitleBarProps };

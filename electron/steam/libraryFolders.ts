@@ -67,4 +67,5 @@ const findSteamLibraries = (steamPath: string): SteamLibrary[] => {
 };
 
 export { findSteamLibraries };
+
 export type { SteamLibrary };

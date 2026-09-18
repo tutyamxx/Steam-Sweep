@@ -55,4 +55,5 @@ const findSteamManifests = (steamAppsPath: string): SteamManifest[] => {
 };
 
 export { findSteamManifests };
+
 export type { SteamManifest };

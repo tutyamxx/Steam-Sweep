@@ -74,4 +74,5 @@ const ScanSection = ({
 };
 
 export { ScanSection };
+
 export type { HeroProps };

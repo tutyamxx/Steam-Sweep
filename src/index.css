@@ -632,3 +632,136 @@ button {
 	margin-top: 24px;
 	margin-bottom: 0;
 }
+
+.cleanup-error {
+	margin: 16px 0 0;
+	padding: 12px 16px;
+	background: #3a1f1f;
+	border: 1px solid #6b2d2d;
+	border-radius: 6px;
+	color: #f2a6a6;
+	font-size: 13px;
+}
+
+.cleanup-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0 / 65%);
+}
+
+.cleanup-modal {
+    width: 420px;
+    max-width: calc(100% - 48px);
+    padding: 24px;
+    background: #171a21;
+    border: 1px solid #2a2f38;
+    border-radius: 8px;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 45%);
+}
+
+.cleanup-modal h2 {
+    margin: 0 0 12px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.cleanup-modal p {
+    margin: 0;
+    color: #a9adb3;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.cleanup-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 28px;
+}
+
+.cleanup-modal-actions button {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+}
+
+.cleanup-cancel-button {
+    padding: 0 16px;
+    background: #2a2f38;
+    border: 1px solid #3a404a;
+    border-radius: 4px;
+    color: #d6d7d8;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.cleanup-cancel-button:hover {
+    background: #343a44;
+}
+
+.cleanup-progress-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0 / 65%);
+}
+
+.cleanup-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 360px;
+    max-width: calc(100% - 48px);
+    padding: 28px 24px;
+    background: #171a21;
+    border: 1px solid #2a2f38;
+    border-radius: 8px;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 45%);
+    text-align: center;
+}
+
+.cleanup-progress-spinner {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 18px;
+    border: 3px solid #2a2f38;
+    border-top-color: #66c0f4;
+    border-radius: 50%;
+    animation: cleanup-spin 0.8s linear infinite;
+}
+
+.cleanup-progress h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.cleanup-progress p {
+    margin: 10px 0 0;
+    color: #a9adb3;
+    font-size: 13px;
+}
+
+.cleanup-progress span {
+    margin-top: 6px;
+    color: #66727d;
+    font-size: 11px;
+}
+
+@keyframes cleanup-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

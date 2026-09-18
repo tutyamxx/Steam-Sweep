@@ -54,4 +54,5 @@ const findSteamGames = (libraries: SteamLibrary[]): SteamGame[] => {
 };
 
 export { findSteamGames };
+
 export type { SteamGame };

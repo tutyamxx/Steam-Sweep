@@ -1,4 +1,4 @@
-import type { CleanupCandidate } from '../../electron/cleanup/types.js';
+import type { CleanupCandidate, CleanupResult } from '../../electron/cleanup/types.js';
 
 /**
  * Represents an installed Steam game returned by the Electron process.
@@ -60,6 +60,8 @@ interface SteamWindowApi {
  */
 interface SteamSweepApi {
 	scan: () => Promise<SteamScanResult>;
+	clean: (candidateIds: string[]) => Promise<CleanupResult>;
+
 	window: SteamWindowApi;
 }
 
@@ -69,5 +71,6 @@ declare global {
 	}
 }
 
-export type { SteamGame, SteamLibrary, SteamScanResult, CleanupCandidate };
+export type { SteamGame, SteamLibrary, SteamScanResult, CleanupCandidate, CleanupResult };
+
 export {};

@@ -4,9 +4,11 @@ import type { CleanupCandidate } from '../types/cleanup';
 interface CleanupListProps {
 	candidates: CleanupCandidate[];
 	selectedIds: Set<string>;
+
 	onToggleCandidate: (id: string) => void;
 	onToggleGame: (candidates: CleanupCandidate[]) => void;
 	onToggleAll: () => void;
+	onDeleteSelected: () => void;
 }
 
 /**
@@ -20,7 +22,8 @@ const CleanupList = ({
     selectedIds,
     onToggleCandidate,
     onToggleGame,
-    onToggleAll
+    onToggleAll,
+    onDeleteSelected
 }: CleanupListProps) => {
     const selectedCandidates = candidates.filter((candidate) => selectedIds.has(candidate.id));
     const selectedSize = selectedCandidates.reduce((sum, candidate) => sum + candidate.size, 0);
@@ -70,7 +73,11 @@ const CleanupList = ({
                         {selectedCandidates.length} selected ·{' '}
                         {formatBytes(selectedSize)}
                     </span>
-                    <button className='delete-button' type='button'>
+                    <button
+                        className='delete-button'
+                        type='button'
+                        onClick={onDeleteSelected}
+                    >
 						Delete Selected
                     </button>
                 </div>
@@ -161,4 +168,5 @@ const CleanupList = ({
 };
 
 export { CleanupList };
+
 export type { CleanupListProps };
