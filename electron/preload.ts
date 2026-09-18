@@ -19,6 +19,13 @@ const steamSweepApi = {
         return ipcRenderer.invoke('steam:clean', candidateIds);
     },
 
+    /**
+	 * Opens the SteamSweep GitHub repository in the default browser.
+	 */
+    openRepository: () => {
+        ipcRenderer.send('repository:open');
+    },
+
     window: {
         /**
 		 * Minimizes the SteamSweep application window.

@@ -765,3 +765,8 @@ button {
         transform: rotate(360deg);
     }
 }
+
+.repository-button svg {
+	width: 16px;
+	height: 16px;
+}

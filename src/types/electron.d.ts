@@ -61,6 +61,7 @@ interface SteamWindowApi {
 interface SteamSweepApi {
 	scan: () => Promise<SteamScanResult>;
 	clean: (candidateIds: string[]) => Promise<CleanupResult>;
+	openRepository: () => void;
 
 	window: SteamWindowApi;
 }

@@ -183,6 +183,13 @@ ipcMain.on('folder:open', (_event, folderPath: string) => {
 });
 
 /**
+ * Handles requests from the renderer to open the SteamSweep GitHub repository.
+ */
+ipcMain.on('repository:open', () => {
+    void shell.openExternal('https://github.com/tutyamxx/Steam-Sweep');
+});
+
+/**
  * Initializes the Electron application once it is ready.
  *
  * Removes the default application menu, creates the main window
