@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import type { SteamGame } from '../steam/games.js';
-import type { CleanupCandidate } from './types.js';
+import type { CleanupCandidate } from '../../types/cleanup.js';
 import {
     backupExtensions,
     crashDirectoryNames,

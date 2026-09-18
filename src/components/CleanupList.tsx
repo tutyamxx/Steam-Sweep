@@ -1,5 +1,5 @@
-import { formatBytes, getCandidateLabel } from '../utils/cleanup';
-import type { CleanupCandidate } from '../types/cleanup';
+import { formatBytes, getCandidateLabel } from '../utils/utils';
+import type { CleanupCandidate } from '../../types/cleanup';
 
 interface CleanupListProps {
 	candidates: CleanupCandidate[];

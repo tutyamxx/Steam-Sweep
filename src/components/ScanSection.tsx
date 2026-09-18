@@ -1,4 +1,4 @@
-import { formatBytes } from '../utils/cleanup';
+import { formatBytes } from '../utils/utils';
 
 interface ScanProps {
 	totalSize: number;

@@ -2,7 +2,7 @@ import { shell } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { SteamGame } from '../steam/games.js';
-import type { CleanupCandidate, CleanupCandidateResult, CleanupResult } from './types.js';
+import type { CleanupCandidate, CleanupCandidateResult, CleanupResult } from '../../types/cleanup.js';
 
 /**
  * Determines whether a candidate path is inside a Steam game installation.

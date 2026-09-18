@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { CleanupResult } from './cleanup/types.js';
+import type { CleanupResult } from '../types/cleanup.js';
 
 const steamSweepApi = {
     /**

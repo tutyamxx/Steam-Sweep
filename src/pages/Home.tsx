@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { CleanupList } from '../components/CleanupList';
 import { ScanSection } from '../components/ScanSection';
 import { TitleBar } from '../components/TitleBar';
-import { formatBytes } from '../utils/cleanup';
-import type { CleanupCandidate } from '../types/cleanup';
+import { formatBytes } from '../utils/utils';
+import type { CleanupCandidate, CleanupResult } from '../../types/cleanup';
 
 const Home = () => {
     const appRef = useRef<HTMLElement>(null);
@@ -142,7 +142,7 @@ const Home = () => {
         setCleanupError(null);
 
         try {
-            const result = await window.steamSweep.clean(selectedCandidates.map((candidate) => candidate.id));
+            const result: CleanupResult = await window.steamSweep.clean(selectedCandidates.map((candidate) => candidate.id));
             const successfulIds = new Set(result.results.filter((cleanupResult) => cleanupResult.success).map((cleanupResult) => cleanupResult.id));
             const failedResults = result.results.filter((cleanupResult) => !cleanupResult.success);
 
@@ -213,11 +213,10 @@ const Home = () => {
                     candidates.length > 0 ? 'has-candidates' : ''
                 }`}
             >
-                This is an unofficial software and is not affiliated with Valve or Steam.
+				This is an unofficial software and is not affiliated with Valve or Steam.
                 <br />
-                Steam and the Steam logo are trademarks and/or registered trademarks of Valve Corporation in the U.S. and/or other countries.
+				Steam and the Steam logo are trademarks and/or registered trademarks of Valve Corporation in the U.S. and/or other countries.
             </footer>
-
             {showBackToTop && (
                 <button
                     className='back-to-top'
@@ -225,7 +224,7 @@ const Home = () => {
                     onClick={scrollToTop}
                     aria-label='Back to top'
                 >
-                    ↑ Top
+					↑ Top
                 </button>
             )}
 
@@ -239,7 +238,7 @@ const Home = () => {
                     >
                         <h2 id='cleanup-modal-title'>Move items to Recycle Bin?</h2>
                         <p>
-                            Move {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} ({formatBytes(selectedSize)}) to the Windows Recycle Bin?
+							Move {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} ({formatBytes(selectedSize)}) to the Windows Recycle Bin?
                         </p>
                         <div className='cleanup-modal-actions'>
                             <button
@@ -247,14 +246,14 @@ const Home = () => {
                                 type='button'
                                 onClick={() => setShowCleanupConfirm(false)}
                             >
-                                Cancel
+								Cancel
                             </button>
                             <button
                                 className='delete-button'
                                 type='button'
                                 onClick={handleConfirmCleanup}
                             >
-                                Move to Recycle Bin
+								Move to Recycle Bin
                             </button>
                         </div>
                     </div>

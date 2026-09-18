@@ -1,4 +1,4 @@
-import type { CleanupCandidate } from '../types/cleanup';
+import type { CleanupCandidate } from '../../types/cleanup';
 
 /**
  * Formats a byte value into a human-readable file size.

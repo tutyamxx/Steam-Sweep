@@ -3,7 +3,7 @@
 		"target": "ES2022",
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
-		"rootDir": "electron",
+		"rootDir": ".",
 		"outDir": "dist-electron",
 		"strict": true,
 		"esModuleInterop": true,
@@ -11,6 +11,7 @@
 		"types": ["node"]
 	},
 	"include": [
-		"electron/**/*.ts"
+		"electron/**/*.ts",
+		"types/**/*.ts"
 	]
 }
