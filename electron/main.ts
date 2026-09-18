@@ -25,7 +25,7 @@ const createWindow = (): void => {
         frame: false,
         show: false,
         title: 'Steam Sweep',
-        icon: path.join(__dirname, '../build/icon.ico'),
+        icon: process.env.VITE_DEV_SERVER_URL ? path.join(__dirname, '../build/icon.ico') : path.join(process.resourcesPath, 'icon.ico'),
         backgroundColor: '#0d0f12',
         webPreferences: {
             preload: path.join(__dirname, 'preload.mjs'),

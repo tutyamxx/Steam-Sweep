@@ -1,6 +1,6 @@
 import { formatBytes } from '../utils/cleanup';
 
-interface HeroProps {
+interface ScanProps {
 	totalSize: number;
 	isScanning: boolean;
 	steamPath: string | null;
@@ -23,7 +23,7 @@ const ScanSection = ({
     hasScanned,
     onScan,
     onOpenSteamFolder
-}: HeroProps) => {
+}: ScanProps) => {
     return (
         <section className='hero'>
             <header className='header'>
@@ -75,4 +75,4 @@ const ScanSection = ({
 
 export { ScanSection };
 
-export type { HeroProps };
+export type { ScanProps };

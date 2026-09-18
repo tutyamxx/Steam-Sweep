@@ -30,6 +30,7 @@ const isValidCandidate = (candidate: CleanupCandidate, games: SteamGame[]): bool
     if (!path.isAbsolute(candidate.path) || !fs.existsSync(candidate.path)) {
         return false;
     }
+
     const game = games.find((steamGame) => steamGame.appId === candidate.gameId && steamGame.name === candidate.gameName);
 
     if (!game) {

@@ -3,15 +3,16 @@
 	"description": "🧹 A lightweight Windows Electron app for scanning Steam game libraries and safely removing unnecessary leftover files.",
 	"author": "tuty",
 	"private": true,
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"type": "module",
 	"main": "dist-electron/main.js",
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -p tsconfig.app.json && vite build",
-		"dist:dir": "npm run build && electron-builder --win --dir",
+		"build:dir": "npm run build && electron-builder --win --dir",
+		"build:portable": "npm run build && electron-builder --win portable",
+		"build:installer": "npm run build && electron-builder",
 		"electron": "electron .",
-		"dist": "npm run build && electron-builder",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"stylelint": "stylelint \"src/**/*.css\"",
@@ -24,16 +25,29 @@
 		"productName": "SteamSweep",
 		"files": [
 			"dist/**/*",
-			"dist-electron/**/*"
+			"dist-electron/**/*",
+			"package.json"
 		],
+		"extraResources": [
+			{
+				"from": "build/icon.ico",
+				"to": "icon.ico"
+			}
+		],
+		"asar": true,
+		"npmRebuild": false,
 		"win": {
 			"target": "nsis",
-			"icon": "build/icon.ico"
+			"icon": "build/icon.ico",
+			"signExecutable": false
+		},
+		"nsis": {
+			"oneClick": false,
+			"allowToChangeInstallationDirectory": true,
+			"createDesktopShortcut": true,
+			"createStartMenuShortcut": false,
+			"shortcutName": "SteamSweep"
 		}
-	},
-	"dependencies": {
-		"react": "^19.2.8",
-		"react-dom": "^19.2.8"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
