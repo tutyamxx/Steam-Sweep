@@ -1,5 +1,7 @@
 {
 	"name": "steam-sweep",
+	"description": "🧹 A lightweight Windows Electron app for scanning Steam game libraries and safely removing unnecessary leftover files.",
+	"author": "tuty",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
@@ -19,6 +21,10 @@
 	"build": {
 		"appId": "com.steamsweep.app",
 		"productName": "SteamSweep",
+		"files": [
+			"dist/**/*",
+			"dist-electron/**/*"
+		],
 		"win": {
 			"target": "nsis",
 			"icon": "build/icon.ico"
@@ -47,7 +53,6 @@
 		"typescript": "~6.0.2",
 		"typescript-eslint": "^8.69.0",
 		"vite": "^8.3.0",
-		"vite-plugin-electron": "^1.1.2",
-		"wait-on": "^9.1.0"
+		"vite-plugin-electron": "^1.1.2"
 	}
 }
