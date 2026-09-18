@@ -110,9 +110,7 @@ const CleanupList = ({
                                 <div className='game-title'>
                                     <strong>{first?.gameName}</strong>
                                     <span>
-                                        {selected.length > 0
-                                            ? `${selected.length} selected`
-                                            : `${gameCandidates.length} items`}
+                                        {selected.length > 0 ? `${selected.length} selected` : `${gameCandidates.length} items`}
                                     </span>
                                 </div>
                                 <span className='game-size'>

@@ -47,9 +47,7 @@ const ScanSection = ({
 
             <div className={`status ${hasScanned && !steamPath ? 'not-found' : ''}`}>
                 <span
-                    className={`status-dot ${
-                        steamPath ? 'active' : hasScanned ? 'not-found' : ''
-                    }`}
+                    className={`status-dot ${steamPath ? 'active' : hasScanned ? 'not-found' : ''}`}
                 />
                 <span>
                     {steamPath ? (
