@@ -238,7 +238,7 @@ const Home = () => {
                     >
                         <h2 id='cleanup-modal-title'>Move items to Recycle Bin?</h2>
                         <p>
-							Move {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} ({formatBytes(selectedSize)}) to the Windows Recycle Bin?
+							Move {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} (<strong>{formatBytes(selectedSize)}</strong>) to the Windows Recycle Bin?
                         </p>
                         <div className='cleanup-modal-actions'>
                             <button
