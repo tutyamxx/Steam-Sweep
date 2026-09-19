@@ -15,29 +15,30 @@ const __dirname = path.dirname(__filename);
  */
 const createWindow = (): void => {
     const window = new BrowserWindow({
-        width: 1100,
-        height: 760,
-        minWidth: 1100,
-        minHeight: 760,
-        maxWidth: 1100,
-        maxHeight: 760,
-        resizable: false,
+        width: 900,
+        height: 650,
+        minWidth: 900,
+        minHeight: 650,
+        resizable: true,
         frame: false,
         show: false,
         title: 'Steam Sweep',
+        thickFrame: false,
         icon: process.env.VITE_DEV_SERVER_URL ? path.join(__dirname, '../build/icon.ico') : path.join(process.resourcesPath, 'icon.ico'),
-        backgroundColor: '#0d0f12',
+        transparent: true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.mjs'),
             contextIsolation: true,
-            nodeIntegration: false
+            nodeIntegration: false,
+            backgroundThrottling: false
+
         }
     });
 
     window.webContents.on('before-input-event', (event, input) => {
         /**
-         * Prevents the default Electron reload shortcut.
-         */
+		 * Prevents the default Electron reload shortcut.
+		 */
         if (input.control && input.shift && input.key.toLowerCase() === 'r') {
             event.preventDefault();
         }
@@ -45,8 +46,8 @@ const createWindow = (): void => {
 
     window.once('ready-to-show', () => {
         /**
-         * Shows the application window once the renderer is ready.
-         */
+		 * Shows the application window once the renderer is ready.
+		 */
         window.show();
     });
 
@@ -187,6 +188,27 @@ ipcMain.on('folder:open', (_event, folderPath: string) => {
  */
 ipcMain.on('repository:open', () => {
     void shell.openExternal('https://github.com/tutyamxx/Steam-Sweep');
+});
+
+/**
+ * Handles requests from the renderer to maximize or restore the application window.
+ *
+ * @param event - IPC event containing the renderer web contents.
+ */
+ipcMain.on('window:maximize', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+
+    if (!window) {
+        return;
+    }
+
+    if (window.isMaximized()) {
+        window.unmaximize();
+
+        return;
+    }
+
+    window.maximize();
 });
 
 /**

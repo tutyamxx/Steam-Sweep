@@ -52,6 +52,10 @@
 			"shortcutName": "SteamSweep"
 		}
 	},
+	"dependencies": {
+		"react": "^19.2.8",
+		"react-dom": "^19.2.7"
+	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@types/node": "^24.13.5",
@@ -60,7 +64,7 @@
 		"@vitejs/plugin-react": "^6.1.1",
 		"concurrently": "^10.0.0",
 		"cspell": "^9.8.0",
-		"electron": "^44.4.2",
+		"electron": "latest",
 		"electron-builder": "^26.15.3",
 		"eslint": "^10.10.0",
 		"eslint-plugin-react-hooks": "^7.1.1",

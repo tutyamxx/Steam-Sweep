@@ -42,6 +42,28 @@ const TitleBar = ({ onMinimize, onClose }: TitleBarProps) => {
                     <span />
                 </button>
                 <button
+                    className='window-button maximize-button'
+                    type='button'
+                    onClick={() => window.steamSweep.window.maximize()}
+                    aria-label='Maximize or restore window'
+                    title='Maximize'
+                >
+                    <svg
+                        viewBox='0 0 12 12'
+                        aria-hidden='true'
+                    >
+                        <rect
+                            x='2'
+                            y='2'
+                            width='8'
+                            height='8'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='1.2'
+                        />
+                    </svg>
+                </button>
+                <button
                     className='window-button close-button'
                     type='button'
                     onClick={onClose}

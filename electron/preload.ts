@@ -35,6 +35,13 @@ const steamSweepApi = {
         },
 
         /**
+		 * Maximizes or restores the SteamSweep application window.
+		 */
+        maximize: () => {
+            ipcRenderer.send('window:maximize');
+        },
+
+        /**
 		 * Closes the SteamSweep application window.
 		 */
         close: () => {

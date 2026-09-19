@@ -48,6 +48,11 @@ interface SteamWindowApi {
 	close: () => void;
 
 	/**
+	 * Maximizes or restores the application window.
+	 */
+	maximize: () => void;
+
+	/**
 	 * Opens a filesystem folder in Windows Explorer.
 	 *
 	 * @param folderPath - Absolute path to the folder to open.
