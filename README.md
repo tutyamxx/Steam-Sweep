@@ -38,5 +38,5 @@
 
 ## 📜 License
 
-This project is currently not licensed for redistribution.
-Steam and the Steam logo are trademarks and/or registered trademarks of Valve Corporation in the U.S. and/or other countries.
+SteamSweep is licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use is not permitted without permission from the copyright holder.
