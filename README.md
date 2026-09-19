@@ -1,7 +1,7 @@
 # Steam Sweep 🧹
 
 <p align="center">
-	<img src="steamsweep.gif" alt="SteamSweep demo">
+	<img src="steamsweep.webp" alt="SteamSweep demo">
 </p>
 
 - A lightweight Windows desktop utility for finding unnecessary leftover files in your Steam game libraries. 🎮
