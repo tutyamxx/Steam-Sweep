@@ -38,5 +38,5 @@
 
 ## 📜 License
 
-SteamSweep is licensed under the PolyForm Noncommercial License 1.0.0.
+SteamSweep is licensed under the PolyForm Non commercial License 1.0.0.
 Commercial use is not permitted without permission from the copyright holder.
