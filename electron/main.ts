@@ -1,24 +1,58 @@
 import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
 import path from 'node:path';
+import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { scanGame } from './cleanup/scanner.js';
 import { findSteamGames } from './steam/games.js';
 import { findSteamInstall } from './steam/discovery.js';
 import { findSteamLibraries } from './steam/libraryFolders.js';
 import { cleanCandidates } from './cleanup/cleanup.js';
-
+import type { WindowState } from '../types/window.js';
+import { minWindowHeight, minWindowWidth } from '../src/utils/utils.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
+ * Loads the saved application window size.
+ *
+ * @returns The saved window dimensions or null when unavailable.
+ */
+const loadWindowState = async (): Promise<WindowState | null> => {
+    try {
+        const data = await readFile(path.join(app.getPath('userData'), 'window-state.json'), 'utf8');
+        const state = JSON.parse(data) as WindowState;
+
+        if (state.width < minWindowWidth || state.height < minWindowHeight) {
+            return null;
+        }
+
+        return state;
+    } catch {
+        return null;
+    }
+};
+
+/**
+ * Saves the current application window size.
+ *
+ * @param window - The application window.
+ */
+const saveWindowState = async (window: BrowserWindow): Promise<void> => {
+    const [width, height] = window.getSize();
+    await writeFile(path.join(app.getPath('userData'), 'window-state.json'), JSON.stringify({ width, height }, null, 4), 'utf8');
+};
+
+/**
  * Creates the main SteamSweep application window.
  */
-const createWindow = (): void => {
+const createWindow = async (): Promise<void> => {
+    const savedState = await loadWindowState();
+
     const window = new BrowserWindow({
-        width: 900,
-        height: 650,
-        minWidth: 900,
-        minHeight: 650,
+        width: savedState?.width ?? minWindowWidth,
+        height: savedState?.height ?? minWindowHeight,
+        minWidth: minWindowWidth,
+        minHeight: minWindowHeight,
         resizable: true,
         frame: false,
         show: false,
@@ -32,6 +66,17 @@ const createWindow = (): void => {
             nodeIntegration: false,
             backgroundThrottling: false
 
+        }
+    });
+
+    /**
+     * Saves the window size when the application window is resized.
+     *
+     * Maximized dimensions are ignored so the user's normal window size is preserved.
+     */
+    window.on('resize', () => {
+        if (!window.isMaximized()) {
+            void saveWindowState(window);
         }
     });
 

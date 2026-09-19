@@ -68,8 +68,19 @@ const TitleBar = ({ onMinimize, onClose }: TitleBarProps) => {
                     type='button'
                     onClick={onClose}
                     aria-label='Close'
+                    title='Close'
                 >
-					×
+                    <svg
+                        viewBox='0 0 12 12'
+                        aria-hidden='true'
+                    >
+                        <path
+                            d='M2.5 2.5L9.5 9.5M9.5 2.5L2.5 9.5'
+                            stroke='currentColor'
+                            strokeWidth='1.2'
+                            strokeLinecap='round'
+                        />
+                    </svg>
                 </button>
             </div>
         </header>

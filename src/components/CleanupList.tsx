@@ -129,18 +129,18 @@ const CleanupList = ({
                                     const isSelected = selectedIds.has(candidate.id);
 
                                     return (
-                                        <label
+                                        <div
                                             className={`candidate ${isSelected ? 'selected' : ''}`}
                                             key={candidate.id}
                                         >
-                                            <div className='candidate-check'>
+                                            <label className='candidate-check'>
                                                 <input
                                                     type='checkbox'
                                                     checked={isSelected}
                                                     onChange={() => onToggleCandidate(candidate.id)}
                                                 />
                                                 <span className='checkbox' />
-                                            </div>
+                                            </label>
                                             <div className='candidate-info'>
                                                 <strong>
                                                     {getCandidateLabel(candidate)}
@@ -155,7 +155,7 @@ const CleanupList = ({
                                             <span className='candidate-size'>
                                                 {formatBytes(candidate.size)}
                                             </span>
-                                        </label>
+                                        </div>
                                     );
                                 })}
                             </div>

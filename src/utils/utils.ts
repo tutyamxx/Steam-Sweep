@@ -43,4 +43,8 @@ const getCandidateLabel = (candidate: CleanupCandidate): string => {
     }
 };
 
+export const minWindowWidth = 900;
+
+export const minWindowHeight = 650;
+
 export { formatBytes, getCandidateLabel };
