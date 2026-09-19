@@ -11,22 +11,22 @@
 
 ## ✨ Features
 
-- Scan your Steam installation automatically
-- Detect installed games across Steam libraries in multiple drives
-- Select individual files or entire games
-- See the total potentially removable disk space
+- Automatically scan your Steam games and find unnecessary leftovers
+- Discover installed games across all your Steam libraries and drives
+- Select exactly what you want to remove, individual files or an entire batch
+- See exactly how much disk space you can reclaim before cleaning
 
 ### 🧹 Cleanup Detection
 
-| Type | What Steam Sweep Finds |
+| Type | What SteamSweep Finds |
 |---|---|
-| 📁 Temporary Folders | Temporary directories and leftover temp data |
-| 📄 Temporary Files | `.tmp`, `.temp` and other temporary files |
-| 📝 Log Files | Old application and game log files |
-| 💥 Crash Dumps | Crash reports and dump files |
-| 💾 Backup Files | `.bak`, `.old` and similar backup files |
-| 📦 Installers | Old installer files and installer archives |
-| 🧰 Installer Archives | Common installer and redistributable archive names |
+| 📁 Temporary Folders | Common temporary directories such as `tmp`, `temp`, `temporary`, `deriveddatacache`, and incomplete download folders |
+| 📄 Temporary Files | Temporary files such as `.tmp`, `.temp`, and `.crdownload` |
+| 📝 Log Files | Log files such as `.log`, `.txt_log`, `.trace`, and `.etl`, plus common log directories |
+| 💥 Crash Dumps | Crash dumps and error reports such as `.dmp`, `.mdmp`, `.hdmp`, and `.wer`, plus common crash-report directories |
+| 💾 Backup Files | Backup files such as `.bak`, `.old`, `.orig`, `.backup`, `.sav.bak`, and temporary `~` copies |
+| 📦 Installers | Standalone installer executables such as `setup.exe`, `installer.exe`, `install.exe`, `dxsetup.exe`, and similar setup programs |
+| 🧰 Installer Archives | Common DirectX, Visual C++, .NET, PhysX, XNA, OpenAL, EA, Epic Games, Ubisoft, and other redistributable installers or archives |
 | 🗑️ Empty Folders | Folders containing no files or subfolders |
 
 

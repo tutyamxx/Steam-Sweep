@@ -6,7 +6,12 @@ const temporaryDirectoryNames = [
     'temp',
     'temporary',
     'tempfiles',
-    'temporaryfiles'
+    'temporaryfiles',
+    'deriveddatacache',
+    'downloading',
+    'temp_download',
+    '__installer',
+    'dotNetFx'
 ];
 
 /**
@@ -18,7 +23,10 @@ const logDirectoryNames = [
     'crashlogs',
     'crash-reports',
     'crashreports',
-    'debuglogs'
+    'debuglogs',
+    'gamelogs',
+    'savedlogs',
+    'steam_logs'
 ];
 
 /**
@@ -30,7 +38,11 @@ const crashDirectoryNames = [
     'crashdump',
     'crashdumps',
     'minidump',
-    'minidumps'
+    'minidumps',
+    'dumps',
+    'bugreport',
+    'bugreports',
+    'telemetry'
 ];
 
 /**
@@ -46,7 +58,13 @@ const installerDirectoryNames = [
     'redistributables',
     'redistributable',
     'installers',
-    'installer'
+    'installer',
+    '_installer',
+    'directx',
+    'vcredist',
+    'prerequisites',
+    'dependencies',
+    'support'
 ];
 
 /**
@@ -54,7 +72,8 @@ const installerDirectoryNames = [
  */
 const temporaryExtensions = [
     '.tmp',
-    '.temp'
+    '.temp',
+    '.crdownload'
 ];
 
 /**
@@ -62,14 +81,19 @@ const temporaryExtensions = [
  */
 const crashDumpExtensions = [
     '.dmp',
-    '.mdmp'
+    '.mdmp',
+    '.hdmp',
+    '.wer'
 ];
 
 /**
  * File extensions commonly used for log files.
  */
 const logExtensions = [
-    '.log'
+    '.log',
+    '.txt_log',
+    '.trace',
+    '.etl'
 ];
 
 /**
@@ -77,7 +101,11 @@ const logExtensions = [
  */
 const backupExtensions = [
     '.bak',
-    '.old'
+    '.old',
+    '.orig',
+    '.backup',
+    '.sav.bak',
+    '~'
 ];
 
 /**
@@ -91,11 +119,15 @@ const installerPatterns = [
     /^installer\.exe$/i,
     /^install\.exe$/i,
     /^setup-.*\.exe$/i,
-    /^installer-.*\.exe$/i
+    /^installer-.*\.exe$/i,
+    /^unins\d{3}\.exe$/i,
+    /^dxsetup\.exe$/i,
+    /^eawrapperlauncher\.exe$/i,
+    /^cleanup\.exe$/i
 ];
 
 /**
- * Common installer and redistributable archive names.
+ * Common installer, runtime, driver, and redistributable archive names.
  *
  * These are treated as review candidates rather than automatically safe
  * cleanup targets.
@@ -108,7 +140,12 @@ const installerArchivePatterns = [
     /^dotnet.*\.(?:exe|msi|zip)$/i,
     /^physx.*\.(?:exe|msi)$/i,
     /^xna.*\.(?:exe|msi)$/i,
-    /^oalinst.*\.exe$/i
+    /^oalinst.*\.exe$/i,
+    /^openal.*\.(?:exe|msi|zip)$/i,
+    /^eadesktop.*\.(?:exe|msi)$/i,
+    /^epicgameslauncher.*\.(?:exe|msi)$/i,
+    /^ubisoftconnect.*\.(?:exe|msi)$/i,
+    /^(?:x64|x86|arm64)_.*redist.*\.(?:exe|msi)$/i
 ];
 
 export {
