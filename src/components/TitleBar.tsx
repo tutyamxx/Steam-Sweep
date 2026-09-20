@@ -1,3 +1,5 @@
+import packageJson from '../../package.json';
+
 interface TitleBarProps {
 	onMinimize: () => void;
 	onClose: () => void;
@@ -14,6 +16,7 @@ const TitleBar = ({ onMinimize, onClose }: TitleBarProps) => {
         <header className='title-bar'>
             <div className='title-bar-drag'>
                 <span>Steam Sweep</span>
+                <span className='software-version'>v{packageJson.version}</span>
             </div>
             <div className='window-controls'>
                 <button

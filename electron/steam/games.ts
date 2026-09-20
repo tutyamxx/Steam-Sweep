@@ -35,16 +35,22 @@ const findSteamGames = (libraries: SteamLibrary[]): SteamGame[] => {
         const manifests = findSteamManifests(library.steamAppsPath);
 
         for (const manifest of manifests) {
-            const installPath = path.join(library.steamAppsPath, 'common', manifest.installDir);
+            const installPath = manifest.installDir?.trim();
 
-            if (!fs.existsSync(installPath)) {
+            if (!installPath) {
+                continue;
+            }
+
+            const gameInstallPath = path.join(library.steamAppsPath, 'common', installPath);
+
+            if (!fs.existsSync(gameInstallPath)) {
                 continue;
             }
 
             games.push({
                 appId: manifest.appId,
                 name: manifest.name,
-                installPath,
+                installPath: gameInstallPath,
                 libraryPath: library.path
             });
         }

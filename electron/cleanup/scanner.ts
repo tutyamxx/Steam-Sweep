@@ -17,10 +17,10 @@ import {
 } from './rules.js';
 
 const fileRules: {
-    extensions: string[];
-    type: CleanupCandidate['type'];
-    confidence: CleanupCandidate['confidence'];
-    reason: string;
+	extensions: string[];
+	type: CleanupCandidate['type'];
+	confidence: CleanupCandidate['confidence'];
+	reason: string;
 }[] = [
     {
         extensions: temporaryExtensions,
@@ -49,10 +49,10 @@ const fileRules: {
 ];
 
 const directoryRules: {
-    names: string[];
-    type: CleanupCandidate['type'];
-    confidence: CleanupCandidate['confidence'];
-    reason: string;
+	names: string[];
+	type: CleanupCandidate['type'];
+	confidence: CleanupCandidate['confidence'];
+	reason: string;
 }[] = [
     {
         names: temporaryDirectoryNames,
@@ -96,14 +96,14 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
     }
 
     /**
-     * Adds a cleanup candidate to the result list.
-     *
-     * @param candidatePath - Absolute path to the candidate.
-     * @param type - Cleanup candidate type.
-     * @param size - Candidate size in bytes.
-     * @param confidence - Candidate confidence level.
-     * @param reason - Explanation shown to the user.
-     */
+	 * Adds a cleanup candidate to the result list.
+	 *
+	 * @param candidatePath - Absolute path to the candidate.
+	 * @param type - Cleanup candidate type.
+	 * @param size - Candidate size in bytes.
+	 * @param confidence - Candidate confidence level.
+	 * @param reason - Explanation shown to the user.
+	 */
     const addCandidate = (
         candidatePath: string,
         type: CleanupCandidate['type'],
@@ -124,11 +124,11 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
     };
 
     /**
-     * Processes a discovered file.
-     *
-     * @param fileName - Filename.
-     * @param filePath - Absolute path to the file.
-     */
+	 * Processes a discovered file.
+	 *
+	 * @param fileName - Filename.
+	 * @param filePath - Absolute path to the file.
+	 */
     const scanFileEntry = (fileName: string, filePath: string): void => {
         const lowerCaseName = fileName.toLowerCase();
         const extension = path.extname(lowerCaseName);
@@ -158,11 +158,11 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
     };
 
     /**
-     * Processes a discovered directory.
-     *
-     * @param entry - Filesystem directory entry.
-     * @param directoryPath - Absolute path to the directory.
-     */
+	 * Processes a discovered directory.
+	 *
+	 * @param entry - Filesystem directory entry.
+	 * @param directoryPath - Absolute path to the directory.
+	 */
     const scanDirectoryEntry = (entry: fs.Dirent, directoryPath: string): void => {
         const directoryName = entry.name.toLowerCase();
         const rule = directoryRules.find((directoryRule) => directoryRule.names.includes(directoryName));
@@ -187,10 +187,10 @@ const scanGame = (game: SteamGame): CleanupCandidate[] => {
     };
 
     /**
-     * Recursively scans a directory.
-     *
-     * @param directoryPath - Absolute path to the directory.
-     */
+	 * Recursively scans a directory.
+	 *
+	 * @param directoryPath - Absolute path to the directory.
+	 */
     const scanDirectory = (directoryPath: string): void => {
         let entries: fs.Dirent[];
 

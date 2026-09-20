@@ -63,9 +63,10 @@ const Home = () => {
 
         try {
             const result = await window.steamSweep.scan();
+
             setHasScanned(true);
-            setSteamPath(result.steamPath);
-            setCandidates(result.candidates);
+            setSteamPath(result?.steamPath ?? null);
+            setCandidates(result?.candidates ?? []);
             setSelectedIds(new Set());
             scrollToTop();
         } finally {
@@ -143,10 +144,11 @@ const Home = () => {
 
         try {
             const result: CleanupResult = await window.steamSweep.clean(selectedCandidates.map((candidate) => candidate.id));
-            const successfulIds = new Set(result.results.filter((cleanupResult) => cleanupResult.success).map((cleanupResult) => cleanupResult.id));
-            const failedResults = result.results.filter((cleanupResult) => !cleanupResult.success);
+            const successfulIds = new Set(result.results?.filter((cleanupResult) => cleanupResult.success).map((cleanupResult) => cleanupResult.id) ?? []);
+            const failedResults = result.results?.filter((cleanupResult) => !cleanupResult.success) ?? [];
 
             setCandidates((current) => current.filter((candidate) => !successfulIds.has(candidate.id)));
+
             setSelectedIds((current) => {
                 const next = new Set(current);
 
@@ -160,10 +162,9 @@ const Home = () => {
             if (failedResults.length > 0) {
                 const error = failedResults[0]?.error;
 
-                setCleanupError(
-                    error
-                        ? `${failedResults.length} item${failedResults.length === 1 ? '' : 's'} could not be moved to the Recycle Bin: ${error}`
-                        : `${failedResults.length} item${failedResults.length === 1 ? '' : 's'} could not be moved to the Recycle Bin.`
+                setCleanupError(error
+                    ? `${failedResults.length} item${failedResults.length === 1 ? '' : 's'} could not be moved to the Recycle Bin: ${error}`
+                    : `${failedResults.length} item${failedResults.length === 1 ? '' : 's'} could not be moved to the Recycle Bin.`
                 );
             }
         } catch {
@@ -217,6 +218,7 @@ const Home = () => {
                 <br />
 				Steam and the Steam logo are trademarks and/or registered trademarks of Valve Corporation in the U.S. and/or other countries.
             </footer>
+
             {showBackToTop && (
                 <button
                     className='back-to-top'

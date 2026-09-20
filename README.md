@@ -29,7 +29,7 @@
 | 🧰 Installer Archives | Common DirectX, Visual C++, .NET, PhysX, XNA, OpenAL, EA, Epic Games, Ubisoft, and other redistributable installers or archives |
 | 🗑️ Empty Folders | Folders containing no files or subfolders |
 
-
+> ⚠️ If sometimes you see the same empty folders after running the cleaner and scanning again, is most definitely because Steam re-creates them again because they are probably needed.
 ## 🔒 Safety
 
 - Steam Sweep is designed to inspect Steam files before performing cleanup.

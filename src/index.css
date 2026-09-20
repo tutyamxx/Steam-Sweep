@@ -792,3 +792,10 @@ button {
 	width: 14px;
 	height: 14px;
 }
+
+.software-version {
+	margin-left: 8px;
+	color: #66c0f4;
+	font-size: 11px;
+	font-weight: 500;
+}

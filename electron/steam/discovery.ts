@@ -76,7 +76,7 @@ const findSteamPathFromRegistry = (): string | null => {
                 continue;
             }
 
-            const value = match[1]?.trim().replaceAll('/', '\\');
+            const value = match?.[1]?.trim().replaceAll('/', '\\');
             const steamPath = valueName === 'SteamExe' ? path.dirname(value) : value;
 
             if (fs.existsSync(path.join(steamPath, 'steam.exe'))) {

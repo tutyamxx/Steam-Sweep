@@ -33,7 +33,7 @@ const isValidCandidate = (candidate: CleanupCandidate, games: SteamGame[]): bool
 
     const game = games.find((steamGame) => steamGame.appId === candidate.gameId && steamGame.name === candidate.gameName);
 
-    if (!game) {
+    if (!game?.installPath) {
         return false;
     }
 
