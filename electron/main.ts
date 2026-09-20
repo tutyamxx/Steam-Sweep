@@ -1,14 +1,20 @@
 import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
+
 import path from 'node:path';
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { scanGame } from './cleanup/scanner.js';
-import { findSteamGames } from './steam/games.js';
+import { Worker } from 'node:worker_threads';
+
+import { findSteamGames, SteamGame } from './steam/games.js';
 import { findSteamInstall } from './steam/discovery.js';
 import { findSteamLibraries } from './steam/libraryFolders.js';
 import { cleanCandidates } from './cleanup/cleanup.js';
+
+import type { CleanupCandidate } from '../types/cleanup.js';
+
 import type { WindowState } from '../types/window.js';
 import { minWindowHeight, minWindowWidth } from '../src/utils/utils.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -40,6 +46,39 @@ const loadWindowState = async (): Promise<WindowState | null> => {
 const saveWindowState = async (window: BrowserWindow): Promise<void> => {
     const [width, height] = window.getSize();
     await writeFile(path.join(app.getPath('userData'), 'window-state.json'), JSON.stringify({ width, height }, null, 4), 'utf8');
+};
+
+/**
+ * Scans a Steam game inside an isolated worker thread.
+ *
+ * @param game - Installed Steam game to scan.
+ * @returns Cleanup candidates discovered inside the game.
+ */
+const scanGameInWorker = (game: SteamGame): Promise<CleanupCandidate[]> => {
+    return new Promise((resolve, reject) => {
+        const worker = new Worker(path.join(__dirname, 'scanner.worker.js'), { workerData: game });
+
+        worker.once('message', (candidates: CleanupCandidate[]) => resolve(candidates));
+        worker.once('error', reject);
+        worker.once('exit', (code) => {
+            if (code !== 0) {
+                reject(new Error(`Scanner worker stopped with exit code ${code}.`));
+            }
+        });
+    });
+};
+
+/**
+ * Scans all installed Steam games concurrently using worker threads.
+ *
+ * @param games - Installed Steam games to scan.
+ * @returns Cleanup candidates discovered across all games.
+ */
+const scanGames = async (games: SteamGame[]): Promise<CleanupCandidate[]> => {
+    const workers = games.map((game) => scanGameInWorker(game));
+    const results = await Promise.all(workers);
+
+    return results.flat();
 };
 
 /**
@@ -112,7 +151,7 @@ const createWindow = async (): Promise<void> => {
  * @returns An object containing the discovered Steam installation,
  * libraries, games and cleanup candidates.
  */
-const scanSteam = () => {
+const scanSteam = async () => {
     const steamPath = findSteamInstall();
 
     if (!steamPath) {
@@ -126,7 +165,7 @@ const scanSteam = () => {
 
     const libraries = findSteamLibraries(steamPath);
     const games = findSteamGames(libraries);
-    const candidates = games.flatMap((game) => scanGame(game));
+    const candidates = await scanGames(games);
 
     return {
         steamPath,
@@ -175,7 +214,7 @@ ipcMain.handle('steam:clean', async (_event, candidateIds: string[]) => {
 
     const libraries = findSteamLibraries(steamPath);
     const games = findSteamGames(libraries);
-    const candidates = games.flatMap((game) => scanGame(game));
+    const candidates = await scanGames(games);
     const candidateMap = new Map(candidates.map((candidate) => [candidate.id, candidate]));
 
     const selectedCandidates = candidateIds
@@ -226,6 +265,15 @@ ipcMain.on('window:close', (event) => {
  */
 ipcMain.on('folder:open', (_event, folderPath: string) => {
     void shell.openPath(folderPath);
+});
+
+/**
+ * Opens Windows Explorer and selects the specified filesystem item.
+ *
+ * @param filePath - Absolute path to the file or folder to show.
+ */
+ipcMain.on('file:show', (_, filePath: string) => {
+    shell.showItemInFolder(filePath);
 });
 
 /**

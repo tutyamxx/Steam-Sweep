@@ -1,4 +1,5 @@
 import { formatBytes, getCandidateLabel } from '../utils/utils';
+
 import type { CleanupCandidate } from '../../types/cleanup';
 
 interface CleanupListProps {
@@ -9,6 +10,7 @@ interface CleanupListProps {
 	onToggleGame: (candidates: CleanupCandidate[]) => void;
 	onToggleAll: () => void;
 	onDeleteSelected: () => void;
+	onSelectAllByType: (type: CleanupCandidate['type']) => void;
 }
 
 /**
@@ -23,7 +25,8 @@ export const CleanupList = ({
     onToggleCandidate,
     onToggleGame,
     onToggleAll,
-    onDeleteSelected
+    onDeleteSelected,
+    onSelectAllByType
 }: CleanupListProps) => {
     const selectedCandidates = candidates.filter((candidate) => selectedIds.has(candidate.id));
     const selectedSize = selectedCandidates.reduce((sum, candidate) => sum + candidate.size, 0);
@@ -52,20 +55,43 @@ export const CleanupList = ({
                         {candidates.length} items · {gameGroups.length} games
                     </span>
                 </div>
-                <label className='select-all'>
-                    <input
-                        type='checkbox'
-                        checked={allSelected}
-                        ref={(input) => {
-                            if (input) {
-                                input.indeterminate = someSelected;
+                <div className='selection-actions'>
+                    <label className='select-all'>
+                        <input
+                            type='checkbox'
+                            checked={allSelected}
+                            ref={(input) => {
+                                if (input) {
+                                    input.indeterminate = someSelected;
+                                }
+                            }}
+                            onChange={onToggleAll}
+                        />
+                        <span className='checkbox' />
+                        <span>Select All</span>
+                    </label>
+                    <select
+                        className='select-type'
+                        defaultValue=''
+                        disabled={allSelected}
+                        onChange={(event) => {
+                            const type = event.target.value as CleanupCandidate['type'];
+
+                            if (type) {
+                                onSelectAllByType(type);
                             }
                         }}
-                        onChange={onToggleAll}
-                    />
-                    <span className='checkbox' />
-                    <span>Select All</span>
-                </label>
+                    >
+                        <option value='' disabled>Select by type</option>
+                        <option value='log'>📄 Logs</option>
+                        <option value='empty-folder'>📁 Empty Folders</option>
+                        <option value='temp-file'>🗑️ Temporary Files</option>
+                        <option value='temp-folder'>📂 Temporary Folders</option>
+                        <option value='crash-dump'>💥 Crash Dumps</option>
+                        <option value='backup'>💾 Backups</option>
+                        <option value='installer'>📦 Installers</option>
+                    </select>
+                </div>
             </div>
             {selectedCandidates.length > 0 && (
                 <div className='selection-bar'>
@@ -145,12 +171,14 @@ export const CleanupList = ({
                                                 <strong>
                                                     {getCandidateLabel(candidate)}
                                                 </strong>
-                                                <div
+                                                <button
                                                     className='candidate-path'
-                                                    title={candidate.path}
+                                                    type='button'
+                                                    title='Open in File Explorer'
+                                                    onClick={() => window.steamSweep.window.showFile(candidate.path)}
                                                 >
                                                     {candidate.path}
-                                                </div>
+                                                </button>
                                             </div>
                                             <span className='candidate-size'>
                                                 {formatBytes(candidate.size)}

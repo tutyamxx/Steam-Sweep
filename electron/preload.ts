@@ -55,6 +55,15 @@ const steamSweepApi = {
 		 */
         openFolder: (folderPath: string) => {
             ipcRenderer.send('folder:open', folderPath);
+        },
+
+        /**
+         * Opens Windows Explorer and selects a filesystem item.
+         *
+         * @param filePath - Absolute path to the file or folder to show.
+         */
+        showFile: (filePath: string) => {
+            ipcRenderer.send('file:show', filePath);
         }
     }
 };

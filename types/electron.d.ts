@@ -58,6 +58,13 @@ interface SteamWindowApi {
 	 * @param folderPath - Absolute path to the folder to open.
 	 */
 	openFolder: (folderPath: string) => void;
+
+	/**
+	 * Opens Windows Explorer and selects a filesystem item.
+	 *
+	 * @param filePath - Absolute path to the file or folder to show.
+	 */
+	showFile: (filePath: string) => void;
 }
 
 /**

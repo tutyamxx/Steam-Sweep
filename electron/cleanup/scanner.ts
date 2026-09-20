@@ -88,7 +88,7 @@ const directoryRules: {
  * @param game - Installed Steam game to scan.
  * @returns Cleanup candidates discovered inside the game directory.
  */
-const scanGame = (game: SteamGame): CleanupCandidate[] => {
+export const scanGame = (game: SteamGame): CleanupCandidate[] => {
     const candidates: CleanupCandidate[] = [];
 
     if (!fs.existsSync(game.installPath)) {
@@ -314,6 +314,7 @@ const isDirectoryReadOnly = (directoryPath: string): boolean => {
             encoding: 'utf8',
             windowsHide: true
         });
+
         const attributes = output.trim().split(/\s+/)[0] ?? '';
 
         return attributes.toUpperCase().includes('R');
@@ -321,5 +322,3 @@ const isDirectoryReadOnly = (directoryPath: string): boolean => {
         return false;
     }
 };
-
-export { scanGame };

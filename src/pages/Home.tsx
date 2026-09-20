@@ -128,6 +128,10 @@ export const Home = () => {
         setShowCleanupConfirm(true);
     };
 
+    const selectAllByType = (type: CleanupCandidate['type']): void => {
+        setSelectedIds(new Set(candidates.filter((candidate) => candidate.type === type).map((candidate) => candidate.id)));
+    };
+
     const handleConfirmCleanup = async (): Promise<void> => {
         const selectedCandidates = candidates.filter((candidate) => selectedIds.has(candidate.id));
 
@@ -207,6 +211,7 @@ export const Home = () => {
                 onToggleGame={toggleGame}
                 onToggleAll={toggleAll}
                 onDeleteSelected={handleDeleteSelected}
+                onSelectAllByType={selectAllByType}
             />
 
             <footer

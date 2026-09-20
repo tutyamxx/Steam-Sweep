@@ -309,6 +309,12 @@ button {
 	font-size: 11px;
 }
 
+.selection-actions {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+
 .select-all {
 	position: relative;
 	display: flex;
@@ -372,6 +378,28 @@ button {
 }
 
 .select-all input:focus-visible + .checkbox {
+	outline: 2px solid #66c0f4;
+	outline-offset: 2px;
+}
+
+.select-type {
+	height: 28px;
+	padding: 0 8px;
+	border: 1px solid #4c6c8c;
+	border-radius: 3px;
+	background: #16202d;
+	color: #8b949e;
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.select-type:hover {
+	border-color: #66c0f4;
+	color: #c7d5e0;
+}
+
+.select-type:focus {
 	outline: 2px solid #66c0f4;
 	outline-offset: 2px;
 }
@@ -593,14 +621,28 @@ button {
 }
 
 .candidate-path {
+	display: block;
+	width: 100%;
 	margin-top: 3px;
+	padding: 0;
+	border: 0;
+	background: none;
 	color: #66727d;
 	font-family: "Cascadia Code", Consolas, monospace;
 	font-size: 10px;
 	line-height: 1.4;
+	text-align: left;
+	text-decoration: none;
 	overflow-wrap: anywhere;
-	cursor: text;
+	cursor: pointer;
 	user-select: text;
+	appearance: none;
+	/* stylelint-disable-next-line property-no-vendor-prefix */
+	-webkit-appearance: none;
+}
+
+.candidate-path:hover {
+	color: #66c0f4;
 }
 
 .candidate-size {
