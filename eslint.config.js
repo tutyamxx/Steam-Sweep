@@ -54,7 +54,8 @@ export default [
             ],
             'react-hooks/rules-of-hooks': 'error',
             'react-hooks/exhaustive-deps': 'warn',
-            'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
+            'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+            'prefer-arrow-callback': 'error'
         }
     },
     {
@@ -95,7 +96,8 @@ export default [
                 { blankLine: 'always', prev: '*', next: 'function' },
                 { blankLine: 'always', prev: '*', next: 'class' },
                 { blankLine: 'always', prev: '*', next: 'export' }
-            ]
+            ],
+            'prefer-arrow-callback': 'error'
         }
     }
 ];
