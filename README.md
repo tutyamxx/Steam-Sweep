@@ -16,7 +16,7 @@
 - Select exactly what you want to remove, individual files or an entire batch
 - See exactly how much disk space you can reclaim before cleaning
 
-### 🧹 Cleanup Detection
+## 🧹 Cleanup Detection
 
 | Type | What SteamSweep Finds |
 |---|---|
@@ -30,11 +30,29 @@
 | 🗑️ Empty Folders | Folders containing no files or subfolders |
 
 > ⚠️ If sometimes you see the same empty folders after running the cleaner and scanning again, is most definitely because Steam re-creates them again because they are probably needed.
+
 ## 🔒 Safety
 
 - Steam Sweep is designed to inspect Steam files before performing cleanup.
 - The scanner itself is **read-only** and does not modify files while scanning.
 - Cleanup actions should only be performed on files identified by Steam Sweep as cleanup candidates.
+
+## ⚠️ Windows SmartScreen Warning
+
+- When launching the installer (`SteamSweep.Setup.1.0.1.exe`), Windows Defender SmartScreen may display a warning stating:
+
+<p align="center">
+	<img src="windowsdefender.png" alt="Windows Defender SmartScreen">
+</p>
+
+### Why does this happen?
+
+- This warning appears because the executable is **not digitally signed** with a paid code-signing certificate (which can cost hundreds of dollars per year). Since this is an open-source project, the app has not yet accumulated enough download reputation with Microsoft SmartScreen. **The app is completely safe to run.**
+
+
+### How to install:
+1. Click on **More info** in the SmartScreen popup.
+2. Click the **Run anyway** button that appears at the bottom.
 
 ## 📜 License
 
