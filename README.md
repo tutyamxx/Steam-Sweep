@@ -1,7 +1,7 @@
 # Steam Sweep 🧹
 
 <p align="center">
-	<img src="steamsweep.webp" alt="SteamSweep demo">
+	<img src="steamsweep.webp" alt="Steam Sweep demo">
 </p>
 
 - A lightweight Windows desktop utility for finding unnecessary leftover files in your Steam game libraries. 🎮
@@ -18,16 +18,16 @@
 
 ## 🧹 Cleanup Detection
 
-| Type | What SteamSweep Finds |
+| Type | What Steam Sweep Finds |
 |---|---|
-| 📁 Temporary Folders | Common temporary directories such as `tmp`, `temp`, `temporary`, `deriveddatacache`, and incomplete download folders |
-| 📄 Temporary Files | Temporary files such as `.tmp`, `.temp`, and `.crdownload` |
-| 📝 Log Files | Log files such as `.log`, `.txt_log`, `.trace`, and `.etl`, plus common log directories |
-| 💥 Crash Dumps | Crash dumps and error reports such as `.dmp`, `.mdmp`, `.hdmp`, and `.wer`, plus common crash-report directories |
-| 💾 Backup Files | Backup files such as `.bak`, `.old`, `.orig`, `.backup`, `.sav.bak`, and temporary `~` copies |
-| 📦 Installers | Standalone installer executables such as `setup.exe`, `installer.exe`, `install.exe`, `dxsetup.exe`, and similar setup programs |
-| 🧰 Installer Archives | Common DirectX, Visual C++, .NET, PhysX, XNA, OpenAL, EA, Epic Games, Ubisoft, and other redistributable installers or archives |
-| 🗑️ Empty Folders | Folders containing no files or subfolders |
+| Temporary Folders | Common temporary directories such as `tmp`, `temp`, `temporary`, `deriveddatacache`, and incomplete download folders |
+| Temporary Files | Temporary files such as `.tmp`, `.temp`, and `.crdownload` |
+| Log Files | Log files such as `.log`, `.txt_log`, `.trace`, and `.etl`, plus common log directories |
+| Crash Dumps | Crash dumps and error reports such as `.dmp`, `.mdmp`, `.hdmp`, and `.wer`, plus common crash-report directories |
+| Backup Files | Backup files such as `.bak`, `.old`, `.orig`, `.backup`, `.sav.bak`, and temporary `~` copies |
+| Installers | Standalone installer executables such as `setup.exe`, `installer.exe`, `install.exe`, `dxsetup.exe`, and similar setup programs |
+| Installer Archives | Common DirectX, Visual C++, .NET, PhysX, XNA, OpenAL, EA, Epic Games, Ubisoft, and other redistributable installers or archives |
+| Empty Folders | Folders containing no files or subfolders |
 
 > ⚠️ If you see the same empty folders reappear after running the cleaner and scanning again, this is most likely because Steam automatically recreates them when they are needed.
 
@@ -56,5 +56,5 @@
 
 ## 📜 License
 
-SteamSweep is licensed under the PolyForm Non commercial License 1.0.0.
+Steam Sweep is licensed under the PolyForm Non commercial License 1.0.0.
 Commercial use is not permitted without permission from the copyright holder.
