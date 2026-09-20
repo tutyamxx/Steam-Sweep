@@ -93,7 +93,8 @@
 		"appmanifest",
 		"installdir",
 		"nsis",
-		"webp"
+		"webp",
+		"windowsdefender"
 	],
 	"ignorePaths": [
 		"node_modules/**",
