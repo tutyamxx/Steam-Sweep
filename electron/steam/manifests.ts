@@ -24,7 +24,7 @@ interface SteamManifest {
  * @param steamAppsPath - Absolute path to a library's steamapps directory.
  * @returns An array of successfully parsed Steam manifests.
  */
-const findSteamManifests = (steamAppsPath: string): SteamManifest[] => {
+export const findSteamManifests = (steamAppsPath: string): SteamManifest[] => {
     if (!fs.existsSync(steamAppsPath)) {
         return [];
     }
@@ -53,7 +53,5 @@ const findSteamManifests = (steamAppsPath: string): SteamManifest[] => {
         })
         .filter((manifest): manifest is SteamManifest => manifest !== null);
 };
-
-export { findSteamManifests };
 
 export type { SteamManifest };

@@ -28,7 +28,7 @@ interface SteamGame {
  * @param libraries - Steam libraries discovered on the system.
  * @returns An array containing all installed Steam games with valid installation paths.
  */
-const findSteamGames = (libraries: SteamLibrary[]): SteamGame[] => {
+export const findSteamGames = (libraries: SteamLibrary[]): SteamGame[] => {
     const games: SteamGame[] = [];
 
     for (const library of libraries) {
@@ -58,7 +58,5 @@ const findSteamGames = (libraries: SteamLibrary[]): SteamGame[] => {
 
     return games;
 };
-
-export { findSteamGames };
 
 export type { SteamGame };

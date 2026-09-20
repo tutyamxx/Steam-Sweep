@@ -28,7 +28,7 @@ const resolveActualPath = (filePath: string): string => {
  *
  * @returns The absolute Steam installation path, or `null` if Steam could not be found.
  */
-const findSteamInstall = (): string | null => {
+export const findSteamInstall = (): string | null => {
     const registrySteamPath = findSteamPathFromRegistry();
 
     if (registrySteamPath && fs.existsSync(registrySteamPath)) {
@@ -89,5 +89,3 @@ const findSteamPathFromRegistry = (): string | null => {
 
     return null;
 };
-
-export { findSteamInstall };

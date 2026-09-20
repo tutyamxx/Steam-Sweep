@@ -17,7 +17,7 @@ interface CleanupListProps {
  * @param props - Cleanup candidates, selection state and selection handlers.
  * @returns The cleanup candidate list.
  */
-const CleanupList = ({
+export const CleanupList = ({
     candidates,
     selectedIds,
     onToggleCandidate,
@@ -166,7 +166,5 @@ const CleanupList = ({
         </section>
     );
 };
-
-export { CleanupList };
 
 export type { CleanupListProps };

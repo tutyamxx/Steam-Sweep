@@ -16,7 +16,7 @@ interface ScanProps {
  * @param props - Hero state and event handlers.
  * @returns The application hero section.
  */
-const ScanSection = ({
+export const ScanSection = ({
     totalSize,
     isScanning,
     steamPath,
@@ -72,7 +72,5 @@ const ScanSection = ({
         </section>
     );
 };
-
-export { ScanSection };
 
 export type { ScanProps };

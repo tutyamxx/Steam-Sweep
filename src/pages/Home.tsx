@@ -5,7 +5,7 @@ import { TitleBar } from '../components/TitleBar';
 import { formatBytes } from '../utils/utils';
 import type { CleanupCandidate, CleanupResult } from '../../types/cleanup';
 
-const Home = () => {
+export const Home = () => {
     const appRef = useRef<HTMLElement>(null);
 
     const [isScanning, setIsScanning] = useState(false);
@@ -279,5 +279,3 @@ const Home = () => {
         </main>
     );
 };
-
-export { Home };

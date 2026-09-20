@@ -11,7 +11,7 @@ interface TitleBarProps {
  * @param props - Title bar event handlers.
  * @returns The application title bar.
  */
-const TitleBar = ({ onMinimize, onClose }: TitleBarProps) => {
+export const TitleBar = ({ onMinimize, onClose }: TitleBarProps) => {
     return (
         <header className='title-bar'>
             <div className='title-bar-drag'>
@@ -89,7 +89,5 @@ const TitleBar = ({ onMinimize, onClose }: TitleBarProps) => {
         </header>
     );
 };
-
-export { TitleBar };
 
 export type { TitleBarProps };

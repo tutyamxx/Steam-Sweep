@@ -1,7 +1,7 @@
 /**
  * Directory names that commonly contain temporary files.
  */
-const temporaryDirectoryNames = [
+export const temporaryDirectoryNames = [
     'tmp',
     'temp',
     'temporary',
@@ -17,7 +17,7 @@ const temporaryDirectoryNames = [
 /**
  * Directory names that commonly contain log files.
  */
-const logDirectoryNames = [
+export const logDirectoryNames = [
     'log',
     'logs',
     'crashlogs',
@@ -32,7 +32,7 @@ const logDirectoryNames = [
 /**
  * Directory names commonly used for crash reports or crash dumps.
  */
-const crashDirectoryNames = [
+export const crashDirectoryNames = [
     'crash',
     'crashes',
     'crashdump',
@@ -51,7 +51,7 @@ const crashDirectoryNames = [
  * These are treated as review candidates because games may legitimately
  * require these files for installation or repair.
  */
-const installerDirectoryNames = [
+export const installerDirectoryNames = [
     '_commonredist',
     'commonredist',
     'redist',
@@ -70,7 +70,7 @@ const installerDirectoryNames = [
 /**
  * File extensions commonly used for temporary files.
  */
-const temporaryExtensions = [
+export const temporaryExtensions = [
     '.tmp',
     '.temp',
     '.crdownload'
@@ -79,7 +79,7 @@ const temporaryExtensions = [
 /**
  * File extensions commonly used for crash dumps.
  */
-const crashDumpExtensions = [
+export const crashDumpExtensions = [
     '.dmp',
     '.mdmp',
     '.hdmp',
@@ -89,7 +89,7 @@ const crashDumpExtensions = [
 /**
  * File extensions commonly used for log files.
  */
-const logExtensions = [
+export const logExtensions = [
     '.log',
     '.txt_log',
     '.trace',
@@ -99,7 +99,7 @@ const logExtensions = [
 /**
  * File extensions commonly associated with backup files.
  */
-const backupExtensions = [
+export const backupExtensions = [
     '.bak',
     '.old',
     '.orig',
@@ -114,7 +114,7 @@ const backupExtensions = [
  * These are treated as review candidates rather than automatically safe
  * cleanup targets because some games legitimately ship these files.
  */
-const installerPatterns = [
+export const installerPatterns = [
     /^setup\.exe$/i,
     /^installer\.exe$/i,
     /^install\.exe$/i,
@@ -132,7 +132,7 @@ const installerPatterns = [
  * These are treated as review candidates rather than automatically safe
  * cleanup targets.
  */
-const installerArchivePatterns = [
+export const installerArchivePatterns = [
     /^directx.*\.(?:exe|msi|cab|zip)$/i,
     /^dxsetup.*\.(?:exe|msi)$/i,
     /^vcredist.*\.(?:exe|msi)$/i,
@@ -147,16 +147,3 @@ const installerArchivePatterns = [
     /^ubisoftconnect.*\.(?:exe|msi)$/i,
     /^(?:x64|x86|arm64)_.*redist.*\.(?:exe|msi)$/i
 ];
-
-export {
-    temporaryDirectoryNames,
-    logDirectoryNames,
-    crashDirectoryNames,
-    installerDirectoryNames,
-    temporaryExtensions,
-    crashDumpExtensions,
-    logExtensions,
-    backupExtensions,
-    installerPatterns,
-    installerArchivePatterns
-};

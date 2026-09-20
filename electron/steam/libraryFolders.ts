@@ -22,7 +22,7 @@ interface SteamLibrary {
  * @param steamPath - Absolute path to the main Steam installation.
  * @returns An array containing all discovered Steam libraries.
  */
-const findSteamLibraries = (steamPath: string): SteamLibrary[] => {
+export const findSteamLibraries = (steamPath: string): SteamLibrary[] => {
     const libraries = new Map<string, SteamLibrary>();
 
     /**
@@ -65,7 +65,5 @@ const findSteamLibraries = (steamPath: string): SteamLibrary[] => {
 
     return [...libraries.values()];
 };
-
-export { findSteamLibraries };
 
 export type { SteamLibrary };
