@@ -8,23 +8,23 @@ permissions:
 
 jobs:
     release:
-        name: 📦 Build & Release
+        name: Build & Release
         runs-on: windows-latest
 
         steps:
-            - name: 📥 Checkout repository
+            - name: Checkout repository
               uses: actions/checkout@v7
               with:
                   fetch-depth: 0
 
-            - name: 🟢 Setup Node.js
+            - name: Setup Node.js
               uses: actions/setup-node@v7
               with:
                   node-version: lts/*
                   check-latest: true
                   cache: npm
 
-            - name: 📦 Install dependencies
+            - name: Install dependencies
               run: npm ci
 
             - name: 🔨 Build installer
@@ -34,7 +34,7 @@ jobs:
                   npm run build
                   npx electron-builder --win --publish never
 
-            - name: 🛡️ Upload installer to VirusTotal
+            - name: Upload installer to VirusTotal
               shell: bash
               env:
                   VT_API_KEY: ${{ secrets.VT_API_KEY }}
@@ -44,7 +44,7 @@ jobs:
                   INSTALLER=$(find release -maxdepth 1 -name 'SteamSweep.Setup.*.exe' -print -quit)
 
                   if [ -z "$INSTALLER" ]; then
-                      echo "❌ SteamSweep installer was not found."
+                      echo "❌ Steam Sweep installer was not found."
                       exit 1
                   fi
 
@@ -53,7 +53,6 @@ jobs:
 
                   echo "📦 Installer: $INSTALLER"
                   echo "🔐 SHA-256: $SHA256"
-                  echo "🔗 VirusTotal report: $VT_URL"
                   echo "📤 Uploading $INSTALLER to VirusTotal..."
 
                   UPLOAD_URL=$(curl -fsSL \
@@ -119,7 +118,7 @@ jobs:
                       echo "VT_URL=$VT_URL"
                   } >> "$GITHUB_ENV"
 
-            - name: 🔢 Get version
+            - name: Get version
               shell: bash
               run: |
                   VERSION=$(node -p "require('./package.json').version")
@@ -159,8 +158,8 @@ jobs:
                       --title "SteamSweep $TAG" \
                       --notes "## 🛡️ VirusTotal
 
-                  [View the SteamSweep installer on VirusTotal]($VT_URL)
+                  [View the Steam Sweep installer on VirusTotal]($VT_URL)
 
-                  **SHA-256:** \`$SHA256\`"
+                  **SHA-256:** 👉 \`$SHA256\`"
 
                   echo "✅ GitHub release $TAG created successfully."
