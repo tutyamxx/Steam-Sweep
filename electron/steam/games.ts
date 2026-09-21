@@ -6,8 +6,8 @@ import { findSteamManifests } from './manifests.js';
 /**
  * Represents an installed Steam game.
  *
- * @property appId - Steam application ID.
- * @property name - Display name of the installed game.
+ * @property appId       - Steam application ID.
+ * @property name        - Display name of the installed game.
  * @property installPath - Absolute path to the game's installation directory.
  * @property libraryPath - Absolute path to the Steam library containing the game.
  */
@@ -26,7 +26,7 @@ interface SteamGame {
  * to the library's steamapps/common directory.
  *
  * @param libraries - Steam libraries discovered on the system.
- * @returns An array containing all installed Steam games with valid installation paths.
+ * @returns         An array containing all installed Steam games with valid installation paths.
  */
 export const findSteamGames = (libraries: SteamLibrary[]): SteamGame[] => {
     const games: SteamGame[] = [];

@@ -14,7 +14,7 @@ interface ScanProps {
  * Renders the main SteamSweep landing section.
  *
  * @param props - Hero state and event handlers.
- * @returns The application hero section.
+ * @returns     The application hero section.
  */
 export const ScanSection = ({
     totalSize,

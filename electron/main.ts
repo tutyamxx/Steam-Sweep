@@ -52,7 +52,7 @@ const saveWindowState = async (window: BrowserWindow): Promise<void> => {
  * Scans a Steam game inside an isolated worker thread.
  *
  * @param game - Installed Steam game to scan.
- * @returns Cleanup candidates discovered inside the game.
+ * @returns    Cleanup candidates discovered inside the game.
  */
 const scanGameInWorker = (game: SteamGame): Promise<CleanupCandidate[]> => {
     return new Promise((resolve, reject) => {
@@ -72,7 +72,7 @@ const scanGameInWorker = (game: SteamGame): Promise<CleanupCandidate[]> => {
  * Scans all installed Steam games concurrently using worker threads.
  *
  * @param games - Installed Steam games to scan.
- * @returns Cleanup candidates discovered across all games.
+ * @returns     Cleanup candidates discovered across all games.
  */
 const scanGames = async (games: SteamGame[]): Promise<CleanupCandidate[]> => {
     const workers = games.map((game) => scanGameInWorker(game));
@@ -121,8 +121,8 @@ const createWindow = async (): Promise<void> => {
 
     window.webContents.on('before-input-event', (event, input) => {
         /**
-		 * Prevents the default Electron reload shortcut.
-		 */
+         * Prevents the default Electron reload shortcut.
+         */
         if (input.control && input.shift && input.key.toLowerCase() === 'r') {
             event.preventDefault();
         }
@@ -130,8 +130,8 @@ const createWindow = async (): Promise<void> => {
 
     window.once('ready-to-show', () => {
         /**
-		 * Shows the application window once the renderer is ready.
-		 */
+         * Shows the application window once the renderer is ready.
+         */
         window.show();
     });
 
@@ -148,8 +148,7 @@ const createWindow = async (): Promise<void> => {
  * Scans the system for the Steam installation, libraries,
  * installed games and potentially unnecessary files.
  *
- * @returns An object containing the discovered Steam installation,
- * libraries, games and cleanup candidates.
+ * @returns An object containing the discovered Steam installation, libraries, games and cleanup candidates.
  */
 const scanSteam = async () => {
     const steamPath = findSteamInstall();
@@ -189,9 +188,9 @@ ipcMain.handle('steam:scan', () => {
  * The candidates are re-scanned and validated in the Electron process
  * before they are moved to the Windows Recycle Bin.
  *
- * @param _event - IPC event from the renderer process.
+ * @param _event       - IPC event from the renderer process.
  * @param candidateIds - IDs of cleanup candidates selected by the user.
- * @returns Cleanup results for each requested candidate.
+ * @returns            Cleanup results for each requested candidate.
  */
 ipcMain.handle('steam:clean', async (_event, candidateIds: string[]) => {
     if (!Array.isArray(candidateIds) || candidateIds.some((id) => typeof id !== 'string')) {
@@ -260,7 +259,7 @@ ipcMain.on('window:close', (event) => {
 /**
  * Handles requests from the renderer to open a filesystem folder in Windows Explorer.
  *
- * @param _event - IPC event from the renderer process.
+ * @param _event     - IPC event from the renderer process.
  * @param folderPath - Absolute filesystem path to open.
  */
 ipcMain.on('folder:open', (_event, folderPath: string) => {

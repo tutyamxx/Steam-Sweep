@@ -86,7 +86,7 @@ const directoryRules: {
  * The scanner is read-only and never modifies the filesystem.
  *
  * @param game - Installed Steam game to scan.
- * @returns Cleanup candidates discovered inside the game directory.
+ * @returns    Cleanup candidates discovered inside the game directory.
  */
 export const scanGame = (game: SteamGame): CleanupCandidate[] => {
     const candidates: CleanupCandidate[] = [];
@@ -96,14 +96,14 @@ export const scanGame = (game: SteamGame): CleanupCandidate[] => {
     }
 
     /**
-	 * Adds a cleanup candidate to the result list.
-	 *
-	 * @param candidatePath - Absolute path to the candidate.
-	 * @param type - Cleanup candidate type.
-	 * @param size - Candidate size in bytes.
-	 * @param confidence - Candidate confidence level.
-	 * @param reason - Explanation shown to the user.
-	 */
+     * Adds a cleanup candidate to the result list.
+     *
+     * @param candidatePath - Absolute path to the candidate.
+     * @param type          - Cleanup candidate type.
+     * @param size          - Candidate size in bytes.
+     * @param confidence    - Candidate confidence level.
+     * @param reason        - Explanation shown to the user.
+     */
     const addCandidate = (
         candidatePath: string,
         type: CleanupCandidate['type'],
@@ -124,11 +124,11 @@ export const scanGame = (game: SteamGame): CleanupCandidate[] => {
     };
 
     /**
-	 * Processes a discovered file.
-	 *
-	 * @param fileName - Filename.
-	 * @param filePath - Absolute path to the file.
-	 */
+     * Processes a discovered file.
+     *
+     * @param fileName - Filename.
+     * @param filePath - Absolute path to the file.
+     */
     const scanFileEntry = (fileName: string, filePath: string): void => {
         const lowerCaseName = fileName.toLowerCase();
         const extension = path.extname(lowerCaseName);
@@ -158,11 +158,11 @@ export const scanGame = (game: SteamGame): CleanupCandidate[] => {
     };
 
     /**
-	 * Processes a discovered directory.
-	 *
-	 * @param entry - Filesystem directory entry.
-	 * @param directoryPath - Absolute path to the directory.
-	 */
+     * Processes a discovered directory.
+     *
+     * @param entry         - Filesystem directory entry.
+     * @param directoryPath - Absolute path to the directory.
+     */
     const scanDirectoryEntry = (entry: fs.Dirent, directoryPath: string): void => {
         const directoryName = entry.name.toLowerCase();
         const rule = directoryRules.find((directoryRule) => directoryRule.names.includes(directoryName));
@@ -187,10 +187,10 @@ export const scanGame = (game: SteamGame): CleanupCandidate[] => {
     };
 
     /**
-	 * Recursively scans a directory.
-	 *
-	 * @param directoryPath - Absolute path to the directory.
-	 */
+     * Recursively scans a directory.
+     *
+     * @param directoryPath - Absolute path to the directory.
+     */
     const scanDirectory = (directoryPath: string): void => {
         let entries: fs.Dirent[];
 
@@ -229,7 +229,7 @@ export const scanGame = (game: SteamGame): CleanupCandidate[] => {
  * Calculates the size of a file.
  *
  * @param filePath - Absolute path to the file.
- * @returns File size in bytes, or `null` if the file cannot be read.
+ * @returns        File size in bytes, or `null` if the file cannot be read.
  */
 const getFileSize = (filePath: string): number | null => {
     try {
@@ -243,7 +243,7 @@ const getFileSize = (filePath: string): number | null => {
  * Calculates the total size of a directory recursively.
  *
  * @param directoryPath - Absolute path to the directory.
- * @returns Total size of all files below the directory, or `null` if the directory cannot be read.
+ * @returns             Total size of all files below the directory, or `null` if the directory cannot be read.
  */
 const getDirectorySize = (directoryPath: string): number | null => {
     let totalSize = 0;
@@ -292,7 +292,7 @@ const getDirectorySize = (directoryPath: string): number | null => {
  * Checks whether a directory contains no entries.
  *
  * @param directoryPath - Absolute path to the directory.
- * @returns True when the directory is empty.
+ * @returns             True when the directory is empty.
  */
 const isDirectoryEmpty = (directoryPath: string): boolean => {
     try {
@@ -306,7 +306,7 @@ const isDirectoryEmpty = (directoryPath: string): boolean => {
  * Checks whether a directory has the Windows read-only attribute.
  *
  * @param directoryPath - Absolute path to the directory.
- * @returns True when the directory has the read-only attribute.
+ * @returns             True when the directory has the read-only attribute.
  */
 const isDirectoryReadOnly = (directoryPath: string): boolean => {
     try {

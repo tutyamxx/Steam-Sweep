@@ -4,7 +4,7 @@ import type { CleanupCandidate } from '../../types/cleanup';
  * Formats a byte value into a human-readable file size.
  *
  * @param bytes - File size in bytes.
- * @returns Formatted file size.
+ * @returns     Formatted file size.
  */
 const formatBytes = (bytes: number): string => {
     if (!bytes) {
@@ -22,7 +22,7 @@ const formatBytes = (bytes: number): string => {
  * Returns the display label for a cleanup candidate type.
  *
  * @param candidate - Cleanup candidate to label.
- * @returns Human-readable cleanup candidate label.
+ * @returns         Human-readable cleanup candidate label.
  */
 const getCandidateLabel = (candidate: CleanupCandidate): string => {
     switch (candidate.type) {

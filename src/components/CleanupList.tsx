@@ -17,7 +17,7 @@ interface CleanupListProps {
  * Renders cleanup candidates grouped by installed Steam game.
  *
  * @param props - Cleanup candidates, selection state and selection handlers.
- * @returns The cleanup candidate list.
+ * @returns     The cleanup candidate list.
  */
 export const CleanupList = ({
     candidates,

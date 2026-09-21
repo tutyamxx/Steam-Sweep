@@ -4,7 +4,7 @@ import path from 'node:path';
 /**
  * Represents a Steam library installed on the filesystem.
  *
- * @property path - Absolute path to the Steam library.
+ * @property path          - Absolute path to the Steam library.
  * @property steamAppsPath - Absolute path to the library's steamapps directory.
  */
 interface SteamLibrary {
@@ -20,16 +20,16 @@ interface SteamLibrary {
  * drives and in non-standard directories.
  *
  * @param steamPath - Absolute path to the main Steam installation.
- * @returns An array containing all discovered Steam libraries.
+ * @returns         An array containing all discovered Steam libraries.
  */
 export const findSteamLibraries = (steamPath: string): SteamLibrary[] => {
     const libraries = new Map<string, SteamLibrary>();
 
     /**
-	 * Adds a Steam library when its steamapps directory exists.
-	 *
-	 * @param libraryPath - Absolute path to the Steam library.
-	 */
+     * Adds a Steam library when its steamapps directory exists.
+     *
+     * @param libraryPath - Absolute path to the Steam library.
+     */
     const addLibrary = (libraryPath: string): void => {
         const normalisedPath = path.normalize(libraryPath);
         const steamAppsPath = path.join(normalisedPath, 'steamapps');

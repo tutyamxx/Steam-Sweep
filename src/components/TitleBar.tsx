@@ -9,7 +9,7 @@ interface TitleBarProps {
  * Renders the custom SteamSweep application title bar and window controls.
  *
  * @param props - Title bar event handlers.
- * @returns The application title bar.
+ * @returns     The application title bar.
  */
 export const TitleBar = ({ onMinimize, onClose }: TitleBarProps) => {
     return (

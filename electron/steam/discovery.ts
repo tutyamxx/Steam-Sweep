@@ -6,7 +6,7 @@ import path from 'node:path';
  * Resolves a filesystem path using the casing stored by Windows.
  *
  * @param filePath - Absolute filesystem path.
- * @returns The path with the filesystem's actual casing, or the original path if it cannot be resolved.
+ * @returns        The path with the filesystem's actual casing, or the original path if it cannot be resolved.
  */
 const resolveActualPath = (filePath: string): string => {
     try {

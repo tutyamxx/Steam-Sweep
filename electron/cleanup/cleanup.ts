@@ -8,8 +8,8 @@ import type { CleanupCandidate, CleanupCandidateResult, CleanupResult } from '..
  * Determines whether a candidate path is inside a Steam game installation.
  *
  * @param candidatePath - Absolute path to the candidate.
- * @param gamePath - Absolute path to the Steam game installation.
- * @returns True when the candidate is inside the game installation.
+ * @param gamePath      - Absolute path to the Steam game installation.
+ * @returns             True when the candidate is inside the game installation.
  */
 const isPathInsideGame = (candidatePath: string, gamePath: string): boolean => {
     const normalizedCandidate = path.resolve(candidatePath);
@@ -23,8 +23,8 @@ const isPathInsideGame = (candidatePath: string, gamePath: string): boolean => {
  * Validates a cleanup candidate before it is moved to the Recycle Bin.
  *
  * @param candidate - Candidate to validate.
- * @param games - Currently discovered Steam games.
- * @returns True when the candidate is safe to process.
+ * @param games     - Currently discovered Steam games.
+ * @returns         True when the candidate is safe to process.
  */
 const isValidCandidate = (candidate: CleanupCandidate, games: SteamGame[]): boolean => {
     if (!path.isAbsolute(candidate.path) || !fs.existsSync(candidate.path)) {
@@ -57,8 +57,8 @@ const isValidCandidate = (candidate: CleanupCandidate, games: SteamGame[]): bool
  * before they are processed.
  *
  * @param candidates - Candidates selected for cleanup.
- * @param games - Currently discovered Steam games.
- * @returns Individual cleanup results for every requested candidate.
+ * @param games      - Currently discovered Steam games.
+ * @returns          Individual cleanup results for every requested candidate.
  */
 const cleanCandidates = async (candidates: CleanupCandidate[], games: SteamGame[]): Promise<CleanupResult> => {
     const results: CleanupCandidateResult[] = [];

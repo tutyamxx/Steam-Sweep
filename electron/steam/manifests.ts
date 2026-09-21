@@ -5,8 +5,8 @@ import path from 'node:path';
  * Represents basic installation information extracted from
  * a Steam application manifest.
  *
- * @property appId - Steam application ID.
- * @property name - Display name of the installed game.
+ * @property appId      - Steam application ID.
+ * @property name       - Display name of the installed game.
  * @property installDir - Directory name used for the game installation.
  */
 interface SteamManifest {
@@ -22,7 +22,7 @@ interface SteamManifest {
  * appmanifest_<appid>.acf inside each library's steamapps directory.
  *
  * @param steamAppsPath - Absolute path to a library's steamapps directory.
- * @returns An array of successfully parsed Steam manifests.
+ * @returns             An array of successfully parsed Steam manifests.
  */
 export const findSteamManifests = (steamAppsPath: string): SteamManifest[] => {
     if (!fs.existsSync(steamAppsPath)) {
