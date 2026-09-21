@@ -72,7 +72,10 @@ jobs:
                   echo "🔎 VirusTotal analysis ID: $ANALYSIS_ID"
                   echo "⏳ Waiting for VirusTotal analysis..."
 
-                  while true; do
+                  MAX_ATTEMPTS=180
+                  ATTEMPT=0
+
+                  while [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; do
                       STATUS=$(curl -fsSL \
                           -H "x-apikey: $VT_API_KEY" \
                           "https://www.virustotal.com/api/v3/analyses/$ANALYSIS_ID" |
@@ -84,8 +87,19 @@ jobs:
                           break
                       fi
 
+                      if [ "$STATUS" = "failed" ]; then
+                          echo "❌ VirusTotal analysis failed."
+                          exit 1
+                      fi
+
+                      ATTEMPT=$((ATTEMPT + 1))
                       sleep 10
                   done
+
+                  if [ "$STATUS" != "completed" ]; then
+                      echo "❌ VirusTotal analysis timed out after 30 minutes."
+                      exit 1
+                  fi
 
                   SHA256=$(sha256sum "$INSTALLER" | awk '{print $1}')
                   VT_URL="https://www.virustotal.com/gui/file/$SHA256"
