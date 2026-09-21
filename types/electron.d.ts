@@ -75,6 +75,32 @@ interface SteamSweepApi {
 	clean: (candidateIds: string[]) => Promise<CleanupResult>;
 	openRepository: () => void;
 
+	/**
+	 * Registers a callback for when a new SteamSweep update is available.
+	 *
+	 * @param callback - Function called with the available version.
+	 */
+	onUpdateAvailable: (callback: (version: string) => void) => void;
+
+	/**
+	 * Registers a callback for SteamSweep update download progress.
+	 *
+	 * @param callback - Function called with the download percentage.
+	 */
+	onUpdateProgress: (callback: (percent: number) => void) => void;
+
+	/**
+	 * Registers a callback for when a SteamSweep update has finished downloading.
+	 *
+	 * @param callback - Function called with the downloaded version.
+	 */
+	onUpdateDownloaded: (callback: (version: string) => void) => void;
+
+	/**
+	 * Restarts SteamSweep and installs the downloaded update.
+	 */
+	installUpdate: () => void;
+
 	window: SteamWindowApi;
 }
 

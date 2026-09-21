@@ -841,3 +841,110 @@ button {
 	font-size: 11px;
 	font-weight: 500;
 }
+
+.update-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 400;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgb(0 0 0 / 65%);
+}
+
+.update-modal {
+	width: 420px;
+	max-width: calc(100% - 48px);
+	padding: 28px 24px;
+	background: #171a21;
+	border: 1px solid #2a2f38;
+	border-radius: 8px;
+	box-shadow: 0 12px 40px rgb(0 0 0 / 50%);
+	text-align: center;
+}
+
+.update-icon {
+	margin-bottom: 12px;
+	font-size: 36px;
+}
+
+.update-modal h2 {
+	margin: 0;
+	color: #fff;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.update-version {
+	margin: 10px 0 0;
+	color: #66c0f4;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.update-detail {
+	margin: 8px 0 20px;
+	color: #8b949e;
+	font-size: 12px;
+}
+
+.update-progress {
+	width: 100%;
+	height: 8px;
+	overflow: hidden;
+	border-radius: 4px;
+	background: #10151b;
+}
+
+.update-progress-bar {
+	height: 100%;
+	border-radius: 4px;
+	background: linear-gradient(90deg, #1a9fff, #66c0f4);
+	transition: width 0.2s ease;
+}
+
+.update-percent {
+	display: block;
+	margin-top: 8px;
+	color: #8b949e;
+	font-size: 11px;
+}
+
+.update-actions {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.update-button,
+.update-later {
+	height: 40px;
+	padding: 0 16px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.update-button {
+	border: 1px solid #67c1f5;
+	background: #1a9fff;
+	color: #fff;
+}
+
+.update-button:hover {
+	filter: brightness(1.08);
+}
+
+.update-later {
+	border: 1px solid #4c6c8c;
+	background: #16202d;
+	color: #c7d5e0;
+}
+
+.update-later:hover {
+	border-color: #66c0f4;
+	color: #fff;
+}

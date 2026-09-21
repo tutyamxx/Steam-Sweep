@@ -23,6 +23,10 @@ export const Home = () => {
     const [hasScanned, setHasScanned] = useState(false);
     const [cleanupError, setCleanupError] = useState<string | null>(null);
 
+    const [updateVersion, setUpdateVersion] = useState<string | null>(null);
+    const [updateProgress, setUpdateProgress] = useState(0);
+    const [updateDownloaded, setUpdateDownloaded] = useState(false);
+
     useEffect(() => {
         const app = appRef.current;
 
@@ -39,6 +43,24 @@ export const Home = () => {
         return () => {
             app.removeEventListener('scroll', handleScroll);
         };
+    }, []);
+
+    useEffect(() => {
+        window.steamSweep.onUpdateAvailable((version) => {
+            setUpdateVersion(version);
+            setUpdateProgress(0);
+            setUpdateDownloaded(false);
+        });
+
+        window.steamSweep.onUpdateProgress((percent) => {
+            setUpdateProgress(percent);
+        });
+
+        window.steamSweep.onUpdateDownloaded((version) => {
+            setUpdateVersion(version);
+            setUpdateProgress(100);
+            setUpdateDownloaded(true);
+        });
     }, []);
 
     const scrollToTop = (): void => {
@@ -152,7 +174,6 @@ export const Home = () => {
             const failedResults = result.results?.filter((cleanupResult) => !cleanupResult.success) ?? [];
 
             setCandidates((current) => current.filter((candidate) => !successfulIds.has(candidate.id)));
-
             setSelectedIds((current) => {
                 const next = new Set(current);
 
@@ -278,6 +299,64 @@ export const Home = () => {
                         <div className='cleanup-progress-spinner' />
                         <h2>Moving files to Recycle Bin...</h2>
                         <span>Deleting {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} (<strong>{formatBytes(selectedSize)}</strong>)</span>
+                    </div>
+                </div>
+            )}
+
+            {updateVersion && (
+                <div className='update-overlay' role='presentation'>
+                    <div
+                        className='update-modal'
+                        role='dialog'
+                        aria-modal='true'
+                        aria-labelledby='update-modal-title'
+                    >
+                        <div className='update-icon'>🧹</div>
+                        <h2 id='update-modal-title'>SteamSweep Update</h2>
+                        {updateDownloaded ? (
+                            <>
+                                <p className='update-version'>
+									Version <strong>{updateVersion}</strong> is ready to install.
+                                </p><br />
+                                <p className='update-detail'>
+									Restart SteamSweep to complete the update.
+                                </p><br />
+                                <div className='update-actions'>
+                                    <button
+                                        className='update-button'
+                                        type='button'
+                                        onClick={() => window.steamSweep.installUpdate()}
+                                    >
+										Restart Now
+                                    </button>
+                                    <button
+                                        className='update-later'
+                                        type='button'
+                                        onClick={() => setUpdateVersion(null)}
+                                    >
+										Later
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <p className='update-version'>
+									Version <strong>{updateVersion}</strong> is available.
+                                </p>
+                                <p className='update-detail'>
+									Downloading update...
+                                </p>
+                                <div className='update-progress'>
+                                    <div
+                                        className='update-progress-bar'
+                                        style={{ width: `${updateProgress}%` }}
+                                    />
+                                </div>
+                                <span className='update-percent'>
+                                    {Math.round(updateProgress)}%
+                                </span>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

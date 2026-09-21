@@ -18,6 +18,8 @@ import { minWindowHeight, minWindowWidth } from '../src/utils/utils.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import { checkForUpdates, setupUpdater } from './updater.js';
+
 /**
  * Loads the saved application window size.
  *
@@ -107,6 +109,9 @@ const createWindow = async (): Promise<void> => {
 
         }
     });
+
+    setupUpdater(window);
+    void checkForUpdates();
 
     /**
      * Saves the window size when the application window is resized.
