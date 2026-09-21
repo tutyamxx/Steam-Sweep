@@ -15,6 +15,7 @@
 - Discover installed games across all your Steam libraries and drives
 - Select exactly what you want to remove, individual files or an entire batch
 - See exactly how much disk space you can reclaim before cleaning
+- Automatic updates
 
 ## 🧹 Cleanup Detection
 
@@ -31,19 +32,27 @@
 
 > ⚠️ If you see the same empty folders reappear after running the cleaner and scanning again, this is most likely because Steam automatically recreates them when they are needed.
 
+## ⚠️ Windows SmartScreen Warning
+
+- When launching the installer (`SteamSweep.Setup.X.X.X.exe`), Windows Defender SmartScreen may display a warning stating:
+
+<p align="center">
+	<img src="windowsdefender.png" alt="Windows Defender SmartScreen">
+</p>
+
+## 📥 Downloading
+
+1. Go to the [Steam Sweep Releases](https://github.com/tutyamxx/Steam-Sweep/releases) page.
+2. Open the latest release.
+3. Under **Assets**, download `SteamSweep.Setup.X.X.X.exe`.
+4. Run the installer and follow the installation prompts.
+5. Launch **Steam Sweep** once installation is complete.
+
 ## 🔒 Safety
 
 - Steam Sweep is designed to inspect Steam files before performing cleanup.
 - The scanner itself is **read-only** and does not modify files while scanning.
 - Cleanup actions should only be performed on files identified by Steam Sweep as cleanup candidates.
-
-## ⚠️ Windows SmartScreen Warning
-
-- When launching the installer (`SteamSweep.Setup.1.0.1.exe`), Windows Defender SmartScreen may display a warning stating:
-
-<p align="center">
-	<img src="windowsdefender.png" alt="Windows Defender SmartScreen">
-</p>
 
 ### Why does this happen?
 
