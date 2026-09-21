@@ -143,7 +143,7 @@ export const CleanupList = ({
                                     <span className='checkbox' />
                                 </label>
                                 <div className='game-title'>
-                                    <strong>{first.gameName}</strong>
+                                    <strong className='game-name'>{first.gameName}</strong>
                                     <span>
                                         {selected.length > 0 ? `${selected.length} selected` : `${gameCandidates.length} items`}
                                     </span>

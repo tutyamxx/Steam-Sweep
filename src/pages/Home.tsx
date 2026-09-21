@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CleanupList } from '../components/CleanupList';
 import { ScanSection } from '../components/ScanSection';
+import { SteamSweepLogo } from '../components/SteamSweepLogo';
 import { TitleBar } from '../components/TitleBar';
 import { formatBytes } from '../utils/utils';
 import type { CleanupCandidate, CleanupResult } from '../../types/cleanup';
@@ -316,7 +317,9 @@ export const Home = () => {
                         aria-modal='true'
                         aria-labelledby='update-modal-title'
                     >
-                        <div className='update-icon'>🧹</div>
+                        <div className='update-icon'>
+                            <SteamSweepLogo className='update-logo' />
+                        </div>
                         <h2 id='update-modal-title'>SteamSweep Update</h2>
                         {updateDownloaded ? (
                             <>
@@ -346,7 +349,7 @@ export const Home = () => {
                         ) : (
                             <>
                                 <p className='update-version'>
-									Version <strong>{updateVersion}</strong> is available.
+									Version <strong>{updateVersion}</strong> is available
                                 </p>
                                 <p className='update-detail'>
 									Downloading update...

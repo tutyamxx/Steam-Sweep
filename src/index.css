@@ -574,6 +574,11 @@ button {
 	white-space: nowrap;
 }
 
+.game-title .game-name {
+	color: #66c0f4;
+	font-weight: 700;
+}
+
 .game-title span {
 	display: block;
 	margin-top: 2px;
@@ -865,7 +870,11 @@ button {
 
 .update-icon {
 	margin-bottom: 12px;
-	font-size: 36px;
+}
+
+.update-logo {
+	width: 72px;
+	height: 72px;
 }
 
 .update-modal h2 {
