@@ -11,11 +11,7 @@ autoUpdater.autoInstallOnAppQuit = true;
  * @param channel - Update event channel.
  * @param data    - Data to send to the renderer.
  */
-const sendUpdateEvent = (
-    window: BrowserWindow,
-    channel: string,
-    data?: unknown
-): void => {
+const sendUpdateEvent = (window: BrowserWindow, channel: string, data?: unknown): void => {
     if (!window.isDestroyed()) {
         window.webContents.send(channel, data);
     }

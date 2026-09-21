@@ -16,7 +16,7 @@ const isPathInsideGame = (candidatePath: string, gamePath: string): boolean => {
     const normalizedGame = path.resolve(gamePath);
     const relativePath = path.relative(normalizedGame, normalizedCandidate);
 
-    return relativePath !== '' && !relativePath.startsWith(`..${path.sep}`) && !path.isAbsolute(relativePath);
+    return Boolean(relativePath) && !relativePath.startsWith(`..${path.sep}`) && !path.isAbsolute(relativePath);
 };
 
 /**
@@ -33,11 +33,7 @@ const isValidCandidate = (candidate: CleanupCandidate, games: SteamGame[]): bool
 
     const game = games.find((steamGame) => steamGame.appId === candidate.gameId && steamGame.name === candidate.gameName);
 
-    if (!game?.installPath) {
-        return false;
-    }
-
-    if (!isPathInsideGame(candidate.path, game.installPath)) {
+    if (!game?.installPath || !isPathInsideGame(candidate.path, game.installPath)) {
         return false;
     }
 

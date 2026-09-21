@@ -5,6 +5,7 @@ import type { CleanupCandidate } from '../../types/cleanup';
 interface CleanupListProps {
 	candidates: CleanupCandidate[];
 	selectedIds: Set<string>;
+    selectedType: string;
 
 	onToggleCandidate: (id: string) => void;
 	onToggleGame: (candidates: CleanupCandidate[]) => void;
@@ -22,6 +23,7 @@ interface CleanupListProps {
 export const CleanupList = ({
     candidates,
     selectedIds,
+    selectedType,
     onToggleCandidate,
     onToggleGame,
     onToggleAll,
@@ -72,7 +74,7 @@ export const CleanupList = ({
                     </label>
                     <select
                         className='select-type'
-                        defaultValue=''
+                        value={selectedType}
                         disabled={allSelected}
                         onChange={(event) => {
                             const type = event.target.value as CleanupCandidate['type'];

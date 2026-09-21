@@ -948,3 +948,9 @@ button {
 	border-color: #66c0f4;
 	color: #fff;
 }
+
+.steam-sweep-logo {
+	width: 120px;
+	height: 120px;
+	margin-bottom: 12px;
+}

@@ -27,6 +27,8 @@ export const Home = () => {
     const [updateProgress, setUpdateProgress] = useState(0);
     const [updateDownloaded, setUpdateDownloaded] = useState(false);
 
+    const [selectedType, setSelectedType] = useState('');
+
     useEffect(() => {
         const app = appRef.current;
 
@@ -90,6 +92,7 @@ export const Home = () => {
             setSteamPath(result?.steamPath ?? null);
             setCandidates(result?.candidates ?? []);
             setSelectedIds(new Set());
+            setSelectedType('');
             scrollToTop();
         } finally {
             setIsScanning(false);
@@ -151,6 +154,7 @@ export const Home = () => {
     };
 
     const selectAllByType = (type: CleanupCandidate['type']): void => {
+        setSelectedType(type);
         setSelectedIds(new Set(candidates.filter((candidate) => candidate.type === type).map((candidate) => candidate.id)));
     };
 
@@ -228,6 +232,7 @@ export const Home = () => {
             <CleanupList
                 candidates={candidates}
                 selectedIds={selectedIds}
+                selectedType={selectedType}
                 onToggleCandidate={toggleCandidate}
                 onToggleGame={toggleGame}
                 onToggleAll={toggleAll}
