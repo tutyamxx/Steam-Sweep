@@ -11,7 +11,7 @@
 		"dev": "vite",
 		"build": "tsc -p tsconfig.app.json && vite build",
 		"build:dir": "npm run build && electron-builder --win --dir",
-		"build:installer": "rm -rf release && npm run build && electron-builder",
+		"build:installer": "rm -rf release && npm run build && electron-builder --publish never",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"stylelint": "stylelint \"src/**/*.css\"",
