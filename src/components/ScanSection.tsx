@@ -238,7 +238,35 @@ export const ScanSection = ({
                 onClick={onScan}
                 disabled={isScanning}
             >
-                {isScanning ? 'Scanning... ⚙️' : 'Scan Steam Libraries 🎮'}
+                {isScanning ? (
+                    <>
+                        <svg
+                            className='scanning-cog'
+                            xmlns='http://www.w3.org/2000/svg'
+                            viewBox='0 0 24 24'
+                            aria-hidden='true'
+                        >
+                            <path
+                                d='M19.43 12.98c.04-.32.07-.65.07-.98s-.02-.66-.07-.98l2.11-1.65-2-3.46-2.49 1c-.52-.4-1.08-.73-1.69-.98L15 3h-4l-.36 2.93c-.61.25-1.17.59-1.69.98l-2.49-1-2 3.46 2.11 1.65c-.04.32-.08.65-.08.98s.03.66.08.98l-2.11 1.65 2 3.46 2.49-1c.52.4 1.08.73 1.69.98L11 21h4l.36-2.93c.61-.25 1.17-.59 1.69-.98l2.49 1 2-3.46-2.11-1.65z'
+                                fill='none'
+                                stroke='currentColor'
+                                strokeWidth='1.8'
+                                strokeLinejoin='round'
+                            />
+                            <circle
+                                cx='13'
+                                cy='12'
+                                r='3'
+                                fill='none'
+                                stroke='currentColor'
+                                strokeWidth='1.8'
+                            />
+                        </svg>
+                        Scanning please wait...
+                    </>
+                ) : (
+                    'Scan Steam Libraries 🎮'
+                )}
             </button>
 
             <div className={`status ${hasScanned && !steamPath ? 'not-found' : ''}`}>

@@ -2,7 +2,6 @@ import { contextBridge, ipcRenderer } from 'electron';
 import type { CleanupResult } from '../types/cleanup.js';
 
 const steamSweepApi = {
-
     /**
      * Scans Steam installations and returns discovered libraries and games.
      */

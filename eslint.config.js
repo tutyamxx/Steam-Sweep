@@ -50,6 +50,7 @@ export default [
             'eol-last': ['error', 'always'],
             'indent': ['error', 4, { SwitchCase: 1 }],
             '@stylistic/spaced-comment': ['error', 'always'],
+            '@stylistic/padded-blocks': ['error', 'never'],
             'padding-line-between-statements': [
                 'error',
                 { blankLine: 'always', prev: '*', next: 'return' },
@@ -115,6 +116,7 @@ export default [
             'eol-last': ['error', 'always'],
             'indent': ['error', 4, { SwitchCase: 1 }],
             '@stylistic/spaced-comment': ['error', 'always'],
+            '@stylistic/padded-blocks': ['error', 'never'],
             'padding-line-between-statements': [
                 'error',
                 { blankLine: 'always', prev: '*', next: 'return' },
