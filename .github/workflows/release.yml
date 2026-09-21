@@ -1,0 +1,143 @@
+name: 🚀 Release
+
+on:
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        name: 📦 Build & Release
+        runs-on: windows-latest
+
+        steps:
+            - name: 📥 Checkout repository
+              uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+
+            - name: 🟢 Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: lts/*
+                  check-latest: true
+                  cache: npm
+
+            - name: 📦 Install dependencies
+              run: npm ci
+
+            - name: 🔨 Build installer
+              run: npm run build:installer
+
+            - name: 🛡️ Upload installer to VirusTotal
+              shell: bash
+              env:
+                  VT_API_KEY: ${{ secrets.VT_API_KEY }}
+              run: |
+                  set -euo pipefail
+
+                  INSTALLER=$(find release -maxdepth 1 -name 'SteamSweep.Setup.*.exe' -print -quit)
+
+                  if [ -z "$INSTALLER" ]; then
+                      echo "❌ SteamSweep installer was not found."
+                      exit 1
+                  fi
+
+                  echo "📤 Uploading $INSTALLER to VirusTotal..."
+
+                  UPLOAD_URL=$(curl -fsSL \
+                      -H "x-apikey: $VT_API_KEY" \
+                      "https://www.virustotal.com/api/v3/files/upload_url" |
+                      jq -r '.data')
+
+                  RESPONSE=$(curl -fsSL \
+                      -X POST \
+                      -H "x-apikey: $VT_API_KEY" \
+                      -F "file=@$INSTALLER" \
+                      "$UPLOAD_URL")
+
+                  ANALYSIS_ID=$(echo "$RESPONSE" | jq -r '.data.id')
+
+                  if [ -z "$ANALYSIS_ID" ] || [ "$ANALYSIS_ID" = "null" ]; then
+                      echo "❌ VirusTotal upload failed."
+                      echo "$RESPONSE"
+                      exit 1
+                  fi
+
+                  echo "🔎 VirusTotal analysis ID: $ANALYSIS_ID"
+                  echo "⏳ Waiting for VirusTotal analysis..."
+
+                  while true; do
+                      STATUS=$(curl -fsSL \
+                          -H "x-apikey: $VT_API_KEY" \
+                          "https://www.virustotal.com/api/v3/analyses/$ANALYSIS_ID" |
+                          jq -r '.data.attributes.status')
+
+                      echo "📊 VirusTotal status: $STATUS"
+
+                      if [ "$STATUS" = "completed" ]; then
+                          break
+                      fi
+
+                      sleep 10
+                  done
+
+                  SHA256=$(sha256sum "$INSTALLER" | awk '{print $1}')
+                  VT_URL="https://www.virustotal.com/gui/file/$SHA256"
+
+                  echo "✅ VirusTotal analysis completed."
+                  echo "🔐 SHA-256: $SHA256"
+                  echo "🔗 VirusTotal report: $VT_URL"
+
+                  {
+                      echo "INSTALLER=$INSTALLER"
+                      echo "SHA256=$SHA256"
+                      echo "VT_URL=$VT_URL"
+                  } >> "$GITHUB_ENV"
+
+            - name: 🔢 Get version
+              shell: bash
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+
+                  echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+                  echo "TAG=v$VERSION" >> "$GITHUB_ENV"
+
+                  echo "🏷️ Release version: $VERSION"
+                  echo "🏷️ Git tag: v$VERSION"
+
+            - name: 🏷️ Create Git tag
+              shell: bash
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+                  echo "🏷️ Creating tag $TAG..."
+                  git tag "$TAG"
+
+                  echo "📤 Pushing tag $TAG..."
+                  git push origin "$TAG"
+
+                  echo "✅ Git tag $TAG created successfully."
+
+            - name: 🚀 Create GitHub Release
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  echo "🚀 Creating GitHub release $TAG..."
+                  echo "📎 Uploading release assets..."
+
+                  gh release create "$TAG" \
+                      "$INSTALLER" \
+                      "release/SteamSweep.Setup.${VERSION}.exe.blockmap" \
+                      "release/latest.yml" \
+                      --title "SteamSweep $TAG" \
+                      --notes "## 🛡️ VirusTotal
+
+                  [View the SteamSweep installer on VirusTotal]($VT_URL)
+
+                  **SHA-256:** \`$SHA256\`"
+
+                  echo "✅ GitHub release $TAG created successfully."
