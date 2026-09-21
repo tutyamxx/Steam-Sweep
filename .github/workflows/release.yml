@@ -27,7 +27,7 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
-            - name: 🔨 Build installer
+            - name: Build installer
               shell: bash
               run: |
                   rm -rf release
@@ -129,7 +129,7 @@ jobs:
                   echo "🏷️ Release version: $VERSION"
                   echo "🏷️ Git tag: v$VERSION"
 
-            - name: 🏷️ Create Git tag
+            - name: Create Git tag
               shell: bash
               run: |
                   git config user.name "github-actions[bot]"
@@ -143,13 +143,16 @@ jobs:
 
                   echo "✅ Git tag $TAG created successfully."
 
-            - name: 🚀 Create GitHub Release
+            - name: Create GitHub Release
               shell: bash
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
+                  GENERATED_AT=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
                   echo "🚀 Creating GitHub release $TAG..."
                   echo "📎 Uploading release assets..."
+                  echo "🕒 Generated: $GENERATED_AT"
 
                   gh release create "$TAG" \
                       "$INSTALLER" \
@@ -160,6 +163,11 @@ jobs:
 
                   [View the Steam Sweep installer on VirusTotal]($VT_URL)
 
-                  **SHA-256:** 👉 \`$SHA256\`"
+                  **SHA-256:** 👉 \`$SHA256\`
+
+                  ## 📦 Build Information
+
+                  **Generated:** $GENERATED_AT
+                  **Version:** $VERSION"
 
                   echo "✅ GitHub release $TAG created successfully."
