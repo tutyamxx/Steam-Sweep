@@ -28,7 +28,11 @@ jobs:
               run: npm ci
 
             - name: 🔨 Build installer
-              run: npm run build:installer
+              shell: bash
+              run: |
+                  rm -rf release
+                  npm run build
+                  npx electron-builder --win --publish never
 
             - name: 🛡️ Upload installer to VirusTotal
               shell: bash
