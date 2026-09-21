@@ -24,10 +24,10 @@ import {
 } from './rules.js';
 
 const fileRules: {
-	extensions: string[];
-	type: CleanupCandidate['type'];
-	confidence: CleanupCandidate['confidence'];
-	reason: string;
+    extensions: string[];
+    type: CleanupCandidate['type'];
+    confidence: CleanupCandidate['confidence'];
+    reason: string;
 }[] = [
     {
         extensions: temporaryExtensions,
@@ -56,10 +56,10 @@ const fileRules: {
 ];
 
 const directoryRules: {
-	names: string[];
-	type: CleanupCandidate['type'];
-	confidence: CleanupCandidate['confidence'];
-	reason: string;
+    names: string[];
+    type: CleanupCandidate['type'];
+    confidence: CleanupCandidate['confidence'];
+    reason: string;
 }[] = [
     {
         names: temporaryDirectoryNames,

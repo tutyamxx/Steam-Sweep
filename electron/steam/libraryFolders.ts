@@ -8,8 +8,8 @@ import path from 'node:path';
  * @property steamAppsPath - Absolute path to the library's steamapps directory.
  */
 interface SteamLibrary {
-	path: string;
-	steamAppsPath: string;
+    path: string;
+    steamAppsPath: string;
 }
 
 /**

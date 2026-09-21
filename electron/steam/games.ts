@@ -12,10 +12,10 @@ import { findSteamManifests } from './manifests.js';
  * @property libraryPath - Absolute path to the Steam library containing the game.
  */
 interface SteamGame {
-	appId: number;
-	name: string;
-	installPath: string;
-	libraryPath: string;
+    appId: number;
+    name: string;
+    installPath: string;
+    libraryPath: string;
 }
 
 /**

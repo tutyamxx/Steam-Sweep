@@ -1,9 +1,7 @@
 /**
  * Represents the persisted Electron application window state.
  */
-interface WindowState {
+export interface WindowState {
 	width: number;
 	height: number;
 }
-
-export type { WindowState };

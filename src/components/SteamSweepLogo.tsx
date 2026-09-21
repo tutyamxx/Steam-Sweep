@@ -1,5 +1,5 @@
 interface SteamSweepLogoProps {
-	className?: string;
+    className?: string;
 }
 
 /**

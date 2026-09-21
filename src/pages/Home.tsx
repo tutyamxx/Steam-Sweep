@@ -101,6 +101,7 @@ export const Home = () => {
     };
 
     const toggleCandidate = (id: string): void => {
+        setSelectedType('');
         setSelectedIds((current) => {
             const next = new Set(current);
 
@@ -115,6 +116,7 @@ export const Home = () => {
     };
 
     const toggleGame = (gameCandidates: CleanupCandidate[]): void => {
+        setSelectedType('');
         setSelectedIds((current) => {
             const next = new Set(current);
             const allSelected = gameCandidates.every((candidate) => next.has(candidate.id));
@@ -132,6 +134,7 @@ export const Home = () => {
     };
 
     const toggleAll = (): void => {
+        setSelectedType('');
         const allSelected = candidates.length > 0 && candidates.every((candidate) => selectedIds.has(candidate.id));
 
         if (allSelected) {
@@ -246,9 +249,9 @@ export const Home = () => {
                     candidates.length > 0 ? 'has-candidates' : ''
                 }`}
             >
-				This is an unofficial software and is not affiliated with Valve or Steam.
+                This is an unofficial software and is not affiliated with Valve or Steam.
                 <br />
-				Steam and the Steam logo are trademarks and/or registered trademarks of Valve Corporation in the U.S. and/or other countries.
+                Steam and the Steam logo are trademarks and/or registered trademarks of Valve Corporation in the U.S. and/or other countries.
             </footer>
 
             {showBackToTop && (
@@ -258,7 +261,7 @@ export const Home = () => {
                     onClick={scrollToTop}
                     aria-label='Back to top'
                 >
-					↑ Top
+                    ↑ Top
                 </button>
             )}
 
@@ -272,7 +275,7 @@ export const Home = () => {
                     >
                         <h2 id='cleanup-modal-title'>Move items to Recycle Bin?</h2>
                         <p>
-							Move {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} (<strong>{formatBytes(selectedSize)}</strong>) to the Windows Recycle Bin?
+                            Move {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} (<strong>{formatBytes(selectedSize)}</strong>) to the Windows Recycle Bin?
                         </p>
                         <div className='cleanup-modal-actions'>
                             <button
@@ -280,14 +283,14 @@ export const Home = () => {
                                 type='button'
                                 onClick={() => setShowCleanupConfirm(false)}
                             >
-								Cancel
+                                Cancel
                             </button>
                             <button
                                 className='delete-button'
                                 type='button'
                                 onClick={handleConfirmCleanup}
                             >
-								Move to Recycle Bin
+                                Move to Recycle Bin
                             </button>
                         </div>
                     </div>
@@ -324,10 +327,10 @@ export const Home = () => {
                         {updateDownloaded ? (
                             <>
                                 <p className='update-version'>
-									Version <strong>{updateVersion}</strong> is ready to install.
+                                    Version <strong>{updateVersion}</strong> is ready to install.
                                 </p><br />
                                 <p className='update-detail'>
-									Restart SteamSweep to complete the update.
+                                    Restart SteamSweep to complete the update.
                                 </p><br />
                                 <div className='update-actions'>
                                     <button
@@ -335,24 +338,24 @@ export const Home = () => {
                                         type='button'
                                         onClick={() => window.steamSweep.installUpdate()}
                                     >
-										Restart Now
+                                        Restart Now
                                     </button>
                                     <button
                                         className='update-later'
                                         type='button'
                                         onClick={() => setUpdateVersion(null)}
                                     >
-										Later
+                                        Later
                                     </button>
                                 </div>
                             </>
                         ) : (
                             <>
                                 <p className='update-version'>
-									Version <strong>{updateVersion}</strong> is available
+                                    Version <strong>{updateVersion}</strong> is available
                                 </p>
                                 <p className='update-detail'>
-									Downloading update...
+                                    Downloading update...
                                 </p>
                                 <div className='update-progress'>
                                     <div

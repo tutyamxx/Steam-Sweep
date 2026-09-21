@@ -2,13 +2,13 @@ import { formatBytes } from '../utils/utils';
 import { SteamSweepLogo } from './SteamSweepLogo';
 
 interface ScanProps {
-	totalSize: number;
-	isScanning: boolean;
-	steamPath: string | null;
-	hasScanned: boolean;
+    totalSize: number;
+    isScanning: boolean;
+    steamPath: string | null;
+    hasScanned: boolean;
 
-	onScan: () => void;
-	onOpenSteamFolder: () => void;
+    onScan: () => void;
+    onOpenSteamFolder: () => void;
 }
 
 /**
@@ -82,7 +82,7 @@ export const ScanSection = ({
                 <span>
                     {steamPath ? (
                         <>
-							Steam root directory found at{' '}
+                            Steam root directory found at{' '}
                             <button
                                 className='status-path'
                                 type='button'

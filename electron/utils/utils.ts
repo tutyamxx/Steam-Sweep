@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 /**
@@ -93,5 +94,19 @@ export const isDirectoryReadOnly = (directoryPath: string): boolean => {
         return attributes.toUpperCase().includes('R');
     } catch {
         return false;
+    }
+};
+
+/**
+ * Resolves a filesystem path using the casing stored by Windows.
+ *
+ * @param filePath - Absolute filesystem path.
+ * @returns        The path with the filesystem's actual casing, or the original path if it cannot be resolved.
+ */
+export const resolveActualPath = (filePath: string): string => {
+    try {
+        return fs.realpathSync.native(path.normalize(filePath));
+    } catch {
+        return filePath;
     }
 };

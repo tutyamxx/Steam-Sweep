@@ -1,7 +1,7 @@
 /**
  * Types of unnecessary files or folders that SteamSweep can detect.
  */
-type CleanupType =
+export type CleanupType =
 	| 'empty-folder'
 	| 'temp-folder'
 	| 'temp-file'
@@ -13,12 +13,12 @@ type CleanupType =
 /**
  * Confidence level assigned to a cleanup candidate.
  */
-type Confidence = 'safe' | 'review';
+export type Confidence = 'safe' | 'review';
 
 /**
  * Represents a file or folder that SteamSweep believes may be removable.
  */
-interface CleanupCandidate {
+export interface CleanupCandidate {
 	id: string;
 	gameId: number | null;
 	gameName: string;
@@ -32,7 +32,7 @@ interface CleanupCandidate {
 /**
  * Represents the result of attempting to clean one candidate.
  */
-interface CleanupCandidateResult {
+export interface CleanupCandidateResult {
 	id: string;
 	success: boolean;
 	error?: string;
@@ -41,14 +41,6 @@ interface CleanupCandidateResult {
 /**
  * Represents the result of a cleanup operation.
  */
-interface CleanupResult {
+export interface CleanupResult {
 	results: CleanupCandidateResult[];
 }
-
-export type {
-    CleanupCandidate,
-    CleanupCandidateResult,
-    CleanupResult,
-    CleanupType,
-    Confidence
-};

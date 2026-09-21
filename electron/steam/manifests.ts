@@ -10,9 +10,9 @@ import path from 'node:path';
  * @property installDir - Directory name used for the game installation.
  */
 interface SteamManifest {
-	appId: number;
-	name: string;
-	installDir: string;
+    appId: number;
+    name: string;
+    installDir: string;
 }
 
 /**

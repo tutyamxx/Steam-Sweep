@@ -3,15 +3,15 @@ import { formatBytes, getCandidateLabel } from '../utils/utils';
 import type { CleanupCandidate } from '../../types/cleanup';
 
 interface CleanupListProps {
-	candidates: CleanupCandidate[];
-	selectedIds: Set<string>;
+    candidates: CleanupCandidate[];
+    selectedIds: Set<string>;
     selectedType: string;
 
-	onToggleCandidate: (id: string) => void;
-	onToggleGame: (candidates: CleanupCandidate[]) => void;
-	onToggleAll: () => void;
-	onDeleteSelected: () => void;
-	onSelectAllByType: (type: CleanupCandidate['type']) => void;
+    onToggleCandidate: (id: string) => void;
+    onToggleGame: (candidates: CleanupCandidate[]) => void;
+    onToggleAll: () => void;
+    onDeleteSelected: () => void;
+    onSelectAllByType: (type: CleanupCandidate['type']) => void;
 }
 
 /**
@@ -106,7 +106,7 @@ export const CleanupList = ({
                         type='button'
                         onClick={onDeleteSelected}
                     >
-						Delete Selected
+                        Delete Selected
                     </button>
                 </div>
             )}

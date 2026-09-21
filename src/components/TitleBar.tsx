@@ -1,8 +1,8 @@
 import packageJson from '../../package.json';
 
 interface TitleBarProps {
-	onMinimize: () => void;
-	onClose: () => void;
+    onMinimize: () => void;
+    onClose: () => void;
 }
 
 /**

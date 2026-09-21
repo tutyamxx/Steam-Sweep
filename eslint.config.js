@@ -51,6 +51,7 @@ export default [
             'indent': ['error', 4, { SwitchCase: 1 }],
             '@stylistic/spaced-comment': ['error', 'always'],
             '@stylistic/padded-blocks': ['error', 'never'],
+            '@stylistic/indent': ['error', 4],
             'padding-line-between-statements': [
                 'error',
                 { blankLine: 'always', prev: '*', next: 'return' },
@@ -117,6 +118,7 @@ export default [
             'indent': ['error', 4, { SwitchCase: 1 }],
             '@stylistic/spaced-comment': ['error', 'always'],
             '@stylistic/padded-blocks': ['error', 'never'],
+            '@stylistic/indent': ['error', 4],
             'padding-line-between-statements': [
                 'error',
                 { blankLine: 'always', prev: '*', next: 'return' },
