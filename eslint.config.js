@@ -14,7 +14,7 @@ export default [
     js.configs.recommended,
     ...tseslint.configs.recommended,
     {
-        files: ['src/**/*.ts', 'src/**/*.tsx', 'eslint.config.js'],
+        files: ['src/**/*.ts', 'src/**/*.tsx', 'types/**/*.ts', 'eslint.config.js'],
         languageOptions: {
             globals: {
                 ...globals.browser,
