@@ -7,7 +7,7 @@ import path from 'node:path';
  * @property path          - Absolute path to the Steam library.
  * @property steamAppsPath - Absolute path to the library's steamapps directory.
  */
-interface SteamLibrary {
+export interface SteamLibrary {
     path: string;
     steamAppsPath: string;
 }
@@ -65,5 +65,3 @@ export const findSteamLibraries = (steamPath: string): SteamLibrary[] => {
 
     return [...libraries.values()];
 };
-
-export type { SteamLibrary };

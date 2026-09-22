@@ -9,7 +9,7 @@ import path from 'node:path';
  * @property name       - Display name of the installed game.
  * @property installDir - Directory name used for the game installation.
  */
-interface SteamManifest {
+export interface SteamManifest {
     appId: number;
     name: string;
     installDir: string;
@@ -53,5 +53,3 @@ export const findSteamManifests = (steamAppsPath: string): SteamManifest[] => {
         })
         .filter((manifest): manifest is SteamManifest => manifest !== null);
 };
-
-export type { SteamManifest };

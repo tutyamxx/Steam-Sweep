@@ -11,7 +11,7 @@ import { findSteamManifests } from './manifests.js';
  * @property installPath - Absolute path to the game's installation directory.
  * @property libraryPath - Absolute path to the Steam library containing the game.
  */
-interface SteamGame {
+export interface SteamGame {
     appId: number;
     name: string;
     installPath: string;
@@ -58,5 +58,3 @@ export const findSteamGames = (libraries: SteamLibrary[]): SteamGame[] => {
 
     return games;
 };
-
-export type { SteamGame };

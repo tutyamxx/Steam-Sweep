@@ -3,7 +3,7 @@ import type { CleanupCandidate, CleanupResult } from '../../electron/cleanup/typ
 /**
  * Represents an installed Steam game returned by the Electron process.
  */
-interface SteamGame {
+export interface SteamGame {
     appId: number;
     name: string;
     installPath: string;
@@ -13,7 +13,7 @@ interface SteamGame {
 /**
  * Represents a Steam library returned by the Electron process.
  */
-interface SteamLibrary {
+export interface SteamLibrary {
     path: string;
     steamAppsPath: string;
 }
@@ -26,7 +26,7 @@ interface SteamLibrary {
  * @property games      - Installed Steam games discovered across all libraries.
  * @property candidates - Potentially unnecessary files and folders discovered during the scan.
  */
-interface SteamScanResult {
+export interface SteamScanResult {
     steamPath: string | null;
     libraries: SteamLibrary[];
     games: SteamGame[];
@@ -36,7 +36,7 @@ interface SteamScanResult {
 /**
  * Controls exposed for the Electron application window.
  */
-interface SteamWindowApi {
+export interface SteamWindowApi {
     /**
      * Minimizes the application window.
      */
@@ -70,7 +70,7 @@ interface SteamWindowApi {
 /**
  * API exposed to the renderer process through Electron's context bridge.
  */
-interface SteamSweepApi {
+export interface SteamSweepApi {
     scan: () => Promise<SteamScanResult>;
     clean: (candidateIds: string[]) => Promise<CleanupResult>;
     openRepository: () => void;
@@ -109,7 +109,5 @@ declare global {
         steamSweep: SteamSweepApi;
     }
 }
-
-export type { SteamGame, SteamLibrary, SteamScanResult, CleanupCandidate, CleanupResult };
 
 export {};
