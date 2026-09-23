@@ -32,7 +32,6 @@ jobs:
               run: |
                   rm -rf release
                   npm run build:installer
-                  npx electron-builder --win --publish never
 
             - name: Upload installer to VirusTotal
               shell: bash
