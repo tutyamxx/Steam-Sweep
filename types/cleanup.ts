@@ -2,13 +2,13 @@
  * Types of unnecessary files or folders that SteamSweep can detect.
  */
 export type CleanupType =
-	| 'empty-folder'
-	| 'temp-folder'
-	| 'temp-file'
-	| 'log'
-	| 'crash-dump'
-	| 'installer'
-	| 'backup';
+    | 'empty-folder'
+    | 'temp-folder'
+    | 'temp-file'
+    | 'log'
+    | 'crash-dump'
+    | 'installer'
+    | 'backup';
 
 /**
  * Confidence level assigned to a cleanup candidate.

@@ -10,8 +10,7 @@ interface SteamSweepLogoProps {
  */
 export const SteamSweepLogo = ({ className }: SteamSweepLogoProps) => {
     return (
-        <svg
-            className={className}
+        <svg className={className}
             xmlns='http://www.w3.org/2000/svg'
             viewBox='0 0 512 512'
             role='img'
@@ -48,16 +47,14 @@ export const SteamSweepLogo = ({ className }: SteamSweepLogoProps) => {
 
             <circle cx='256' cy='256' r='236' fill='#080d14' />
             <circle cx='256' cy='256' r='224' fill='url(#steam-sweep-logo-bg)' />
-            <circle
-                cx='256'
+            <circle cx='256'
                 cy='256'
                 r='224'
                 fill='none'
                 stroke='#0b151f'
                 strokeWidth='14'
             />
-            <circle
-                cx='256'
+            <circle cx='256'
                 cy='256'
                 r='214'
                 fill='none'
@@ -65,8 +62,7 @@ export const SteamSweepLogo = ({ className }: SteamSweepLogoProps) => {
                 strokeWidth='5'
                 opacity='0.9'
             />
-            <circle
-                cx='256'
+            <circle cx='256'
                 cy='256'
                 r='198'
                 fill='none'
@@ -75,31 +71,27 @@ export const SteamSweepLogo = ({ className }: SteamSweepLogoProps) => {
                 strokeDasharray='2 18'
                 opacity='0.45'
             />
-            <circle
-                cx='256'
+            <circle cx='256'
                 cy='256'
                 r='52'
                 fill='#111d2a'
                 stroke='url(#steam-sweep-logo-blue)'
                 strokeWidth='8'
             />
-            <circle
-                cx='256'
+            <circle cx='256'
                 cy='256'
                 r='22'
                 fill='url(#steam-sweep-logo-blue)'
                 filter='url(#steam-sweep-logo-glow)'
             />
             <circle cx='256' cy='256' r='9' fill='#ffffff' />
-            <path
-                d='M 217 278 L 151 344'
+            <path d='M 217 278 L 151 344'
                 fill='none'
                 stroke='url(#steam-sweep-logo-metal)'
                 strokeWidth='20'
                 strokeLinecap='round'
             />
-            <circle
-                cx='145'
+            <circle cx='145'
                 cy='350'
                 r='25'
                 fill='#162536'
@@ -109,16 +101,14 @@ export const SteamSweepLogo = ({ className }: SteamSweepLogoProps) => {
             <circle cx='145' cy='350' r='8' fill='#ffffff' />
 
             <g transform='rotate(-38 256 256)'>
-                <rect
-                    x='246'
+                <rect x='246'
                     y='65'
                     width='20'
                     height='255'
                     rx='10'
                     fill='url(#steam-sweep-logo-metal)'
                 />
-                <rect
-                    x='249'
+                <rect x='249'
                     y='70'
                     width='6'
                     height='230'
@@ -126,20 +116,17 @@ export const SteamSweepLogo = ({ className }: SteamSweepLogoProps) => {
                     fill='#ffffff'
                     opacity='0.6'
                 />
-                <circle
-                    cx='256'
+                <circle cx='256'
                     cy='67'
                     r='18'
                     fill='#162536'
                     stroke='url(#steam-sweep-logo-blue)'
                     strokeWidth='6'
                 />
-                <path
-                    d='M 205 305 L 307 305 L 326 337 L 186 337 Z'
+                <path d='M 205 305 L 307 305 L 326 337 L 186 337 Z'
                     fill='url(#steam-sweep-logo-metal)'
                 />
-                <rect
-                    x='190'
+                <rect x='190'
                     y='331'
                     width='132'
                     height='13'
@@ -148,28 +135,25 @@ export const SteamSweepLogo = ({ className }: SteamSweepLogoProps) => {
                     stroke='#66c0f4'
                     strokeWidth='2'
                 />
-                <path
-                    d='M 190 340 Q 256 375 322 340 L 382 423 Q 256 470 130 423 Z'
+                <path d='M 190 340 Q 256 375 322 340 L 382 423 Q 256 470 130 423 Z'
                     fill='url(#steam-sweep-logo-bristles)'
                     filter='url(#steam-sweep-logo-glow)'
                 />
-                <path
-                    d='M 190 343 L 154 426
+                <path d='M 190 343 L 154 426
 					M 215 350 L 194 440
 					M 240 355 L 232 446
 					M 266 355 L 274 446
 					M 292 350 L 318 440
 					M 317 343 L 356 426'
-                    fill='none'
-                    stroke='#0c4562'
-                    strokeWidth='4'
-                    strokeLinecap='round'
-                    opacity='0.7'
+                fill='none'
+                stroke='#0c4562'
+                strokeWidth='4'
+                strokeLinecap='round'
+                opacity='0.7'
                 />
             </g>
 
-            <path
-                d='M 90 300 A 185 185 0 0 1 405 135'
+            <path d='M 90 300 A 185 185 0 0 1 405 135'
                 fill='none'
                 stroke='#66e5ff'
                 strokeWidth='7'
@@ -177,8 +161,7 @@ export const SteamSweepLogo = ({ className }: SteamSweepLogoProps) => {
                 opacity='0.65'
                 filter='url(#steam-sweep-logo-glow)'
             />
-            <path
-                d='M 105 330 A 205 205 0 0 1 425 165'
+            <path d='M 105 330 A 205 205 0 0 1 425 165'
                 fill='none'
                 stroke='#168fd0'
                 strokeWidth='4'

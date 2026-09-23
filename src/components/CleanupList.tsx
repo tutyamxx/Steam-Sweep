@@ -59,8 +59,7 @@ export const CleanupList = ({
                 </div>
                 <div className='selection-actions'>
                     <label className='select-all'>
-                        <input
-                            type='checkbox'
+                        <input type='checkbox'
                             checked={allSelected}
                             ref={(input) => {
                                 if (input) {
@@ -72,8 +71,7 @@ export const CleanupList = ({
                         <span className='checkbox' />
                         <span>Select All</span>
                     </label>
-                    <select
-                        className='select-type'
+                    <select className='select-type'
                         value={selectedType}
                         disabled={allSelected}
                         onChange={(event) => {
@@ -101,8 +99,7 @@ export const CleanupList = ({
                         {selectedCandidates.length} selected ·{' '}
                         {formatBytes(selectedSize)}
                     </span>
-                    <button
-                        className='delete-button'
+                    <button className='delete-button'
                         type='button'
                         onClick={onDeleteSelected}
                     >
@@ -124,14 +121,12 @@ export const CleanupList = ({
                     const someGameSelected = selected.length > 0 && !allGameSelected;
 
                     return (
-                        <article
-                            className='game-card'
+                        <article className='game-card'
                             key={`${first.gameId}-${first.gameName}`}
                         >
                             <div className='game-header'>
                                 <label className='game-select'>
-                                    <input
-                                        type='checkbox'
+                                    <input type='checkbox'
                                         checked={allGameSelected}
                                         ref={(input) => {
                                             if (input) {
@@ -157,13 +152,11 @@ export const CleanupList = ({
                                     const isSelected = selectedIds.has(candidate.id);
 
                                     return (
-                                        <div
-                                            className={`candidate ${isSelected ? 'selected' : ''}`}
+                                        <div className={`candidate ${isSelected ? 'selected' : ''}`}
                                             key={candidate.id}
                                         >
                                             <label className='candidate-check'>
-                                                <input
-                                                    type='checkbox'
+                                                <input type='checkbox'
                                                     checked={isSelected}
                                                     onChange={() => onToggleCandidate(candidate.id)}
                                                 />
@@ -173,8 +166,7 @@ export const CleanupList = ({
                                                 <strong>
                                                     {getCandidateLabel(candidate)}
                                                 </strong>
-                                                <button
-                                                    className='candidate-path'
+                                                <button className='candidate-path'
                                                     type='button'
                                                     title='Open in File Explorer'
                                                     onClick={() => window.steamSweep.window.showFile(candidate.path)}

@@ -72,11 +72,7 @@ const cleanCandidates = async (candidates: CleanupCandidate[], games: SteamGame[
 
         try {
             await shell.trashItem(candidate.path);
-
-            results.push({
-                id: candidate.id,
-                success: true
-            });
+            results.push({ id: candidate.id, success: true });
         } catch (error) {
             results.push({
                 id: candidate.id,
@@ -86,9 +82,7 @@ const cleanCandidates = async (candidates: CleanupCandidate[], games: SteamGame[
         }
     }
 
-    return {
-        results
-    };
+    return { results };
 };
 
 export { cleanCandidates };

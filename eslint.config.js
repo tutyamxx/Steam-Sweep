@@ -81,7 +81,12 @@ export default [
             ],
             'jsdoc/check-alignment': 'error',
             'jsdoc/check-indentation': 'error',
-            'jsdoc/check-line-alignment': ['error', 'always']
+            'jsdoc/check-line-alignment': ['error', 'always'],
+            '@stylistic/jsx-max-props-per-line': ['error', { maximum: 10 }],
+            '@stylistic/jsx-first-prop-new-line': ['error', 'never'],
+            '@stylistic/jsx-one-expression-per-line': 'off',
+            '@stylistic/jsx-closing-bracket-location': ['error', 'tag-aligned'],
+            '@stylistic/jsx-quotes': ['error', 'prefer-single']
         }
     },
     {
@@ -145,7 +150,12 @@ export default [
             ],
             'jsdoc/check-alignment': 'error',
             'jsdoc/check-indentation': 'error',
-            'jsdoc/check-line-alignment': ['error', 'always']
+            'jsdoc/check-line-alignment': ['error', 'always'],
+            '@stylistic/jsx-max-props-per-line': ['error', { maximum: 10 }],
+            '@stylistic/jsx-first-prop-new-line': ['error', 'never'],
+            '@stylistic/jsx-one-expression-per-line': 'off',
+            '@stylistic/jsx-closing-bracket-location': ['error', 'tag-aligned'],
+            '@stylistic/jsx-quotes': ['error', 'prefer-single']
         }
     }
 ];

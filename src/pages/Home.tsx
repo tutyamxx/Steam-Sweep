@@ -213,14 +213,14 @@ export const Home = () => {
     const totalSize = candidates.reduce((sum, candidate) => sum + candidate.size, 0);
 
     return (
-        <main className='app' ref={appRef}>
-            <TitleBar
-                onMinimize={handleMinimize}
+        <main className='app'
+            ref={appRef}
+        >
+            <TitleBar onMinimize={handleMinimize}
                 onClose={handleClose}
             />
 
-            <ScanSection
-                totalSize={totalSize}
+            <ScanSection totalSize={totalSize}
                 isScanning={isScanning}
                 steamPath={steamPath}
                 hasScanned={hasScanned}
@@ -228,13 +228,14 @@ export const Home = () => {
                 onOpenSteamFolder={handleOpenSteamFolder}
             />
             {cleanupError && (
-                <div className='cleanup-error' role='alert'>
+                <div className='cleanup-error'
+                    role='alert'
+                >
                     {cleanupError}
                 </div>
             )}
 
-            <CleanupList
-                candidates={candidates}
+            <CleanupList candidates={candidates}
                 selectedIds={selectedIds}
                 selectedType={selectedType}
                 onToggleCandidate={toggleCandidate}
@@ -244,10 +245,9 @@ export const Home = () => {
                 onSelectAllByType={selectAllByType}
             />
 
-            <footer
-                className={`footer ${
-                    candidates.length > 0 ? 'has-candidates' : ''
-                }`}
+            <footer className={`footer ${
+                candidates.length > 0 ? 'has-candidates' : ''
+            }`}
             >
                 This is an unofficial software and is not affiliated with Valve or Steam.
                 <br />
@@ -255,8 +255,7 @@ export const Home = () => {
             </footer>
 
             {showBackToTop && (
-                <button
-                    className='back-to-top'
+                <button className='back-to-top'
                     type='button'
                     onClick={scrollToTop}
                     aria-label='Back to top'
@@ -266,9 +265,10 @@ export const Home = () => {
             )}
 
             {showCleanupConfirm && (
-                <div className='cleanup-modal-backdrop' role='presentation'>
-                    <div
-                        className='cleanup-modal'
+                <div className='cleanup-modal-backdrop'
+                    role='presentation'
+                >
+                    <div className='cleanup-modal'
                         role='dialog'
                         aria-modal='true'
                         aria-labelledby='cleanup-modal-title'
@@ -278,15 +278,13 @@ export const Home = () => {
                             Move {selectedCandidates.length} item{selectedCandidates.length === 1 ? '' : 's'} (<strong>{formatBytes(selectedSize)}</strong>) to the Windows Recycle Bin?
                         </p>
                         <div className='cleanup-modal-actions'>
-                            <button
-                                className='cleanup-cancel-button'
+                            <button className='cleanup-cancel-button'
                                 type='button'
                                 onClick={() => setShowCleanupConfirm(false)}
                             >
                                 Cancel
                             </button>
-                            <button
-                                className='delete-button'
+                            <button className='delete-button'
                                 type='button'
                                 onClick={handleConfirmCleanup}
                             >
@@ -298,9 +296,10 @@ export const Home = () => {
             )}
 
             {showCleanupProgress && (
-                <div className='cleanup-progress-backdrop' role='presentation'>
-                    <div
-                        className='cleanup-progress'
+                <div className='cleanup-progress-backdrop'
+                    role='presentation'
+                >
+                    <div className='cleanup-progress'
                         role='status'
                         aria-live='polite'
                         aria-label='Moving files to the Recycle Bin'
@@ -313,9 +312,10 @@ export const Home = () => {
             )}
 
             {updateVersion && (
-                <div className='update-overlay' role='presentation'>
-                    <div
-                        className='update-modal'
+                <div className='update-overlay'
+                    role='presentation'
+                >
+                    <div className='update-modal'
                         role='dialog'
                         aria-modal='true'
                         aria-labelledby='update-modal-title'
@@ -333,15 +333,13 @@ export const Home = () => {
                                     Restart SteamSweep to complete the update.
                                 </p><br />
                                 <div className='update-actions'>
-                                    <button
-                                        className='update-button'
+                                    <button className='update-button'
                                         type='button'
                                         onClick={() => window.steamSweep.installUpdate()}
                                     >
                                         Restart Now
                                     </button>
-                                    <button
-                                        className='update-later'
+                                    <button className='update-later'
                                         type='button'
                                         onClick={() => setUpdateVersion(null)}
                                     >
@@ -358,8 +356,7 @@ export const Home = () => {
                                     Downloading update...
                                 </p>
                                 <div className='update-progress'>
-                                    <div
-                                        className='update-progress-bar'
+                                    <div className='update-progress-bar'
                                         style={{ width: `${updateProgress}%` }}
                                     />
                                 </div>
