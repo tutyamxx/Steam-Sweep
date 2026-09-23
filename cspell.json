@@ -95,7 +95,10 @@
     "installdir",
     "nsis",
     "webp",
-    "windowsdefender"
+    "windowsdefender",
+    "Elden",
+    "ELDEN",
+    "steamlibrary"
   ],
   "ignorePaths": [
     "node_modules/**",
