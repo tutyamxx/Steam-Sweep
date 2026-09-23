@@ -1,4 +1,4 @@
-interface SteamSweepLogoProps {
+export interface SteamSweepLogoProps {
     className?: string;
 }
 
@@ -176,5 +176,3 @@ export const SteamSweepLogo = ({ className }: SteamSweepLogoProps) => {
         </svg>
     );
 };
-
-export type { SteamSweepLogoProps };

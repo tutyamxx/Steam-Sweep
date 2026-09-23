@@ -6,7 +6,7 @@ import type { CleanupCandidate } from '../../types/cleanup';
  * @param bytes - File size in bytes.
  * @returns     Formatted file size.
  */
-const formatBytes = (bytes: number): string => {
+export const formatBytes = (bytes: number): string => {
     if (!bytes) {
         return '0 B';
     }
@@ -24,7 +24,7 @@ const formatBytes = (bytes: number): string => {
  * @param candidate - Cleanup candidate to label.
  * @returns         Human-readable cleanup candidate label.
  */
-const getCandidateLabel = (candidate: CleanupCandidate): string => {
+export const getCandidateLabel = (candidate: CleanupCandidate): string => {
     switch (candidate.type) {
         case 'empty-folder':
             return 'Empty folders';
@@ -52,5 +52,3 @@ export const minWindowWidth = 900;
  * Minimum height allowed for the application window.
  */
 export const minWindowHeight = 650;
-
-export { formatBytes, getCandidateLabel };

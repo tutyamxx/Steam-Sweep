@@ -1,6 +1,6 @@
 import packageJson from '../../package.json';
 
-interface TitleBarProps {
+export interface TitleBarProps {
     onMinimize: () => void;
     onClose: () => void;
 }
@@ -79,5 +79,3 @@ export const TitleBar = ({ onMinimize, onClose }: TitleBarProps) => {
         </header>
     );
 };
-
-export type { TitleBarProps };
