@@ -24,25 +24,37 @@ const sendUpdateEvent = (window: BrowserWindow, channel: string, data?: unknown)
  */
 export const setupUpdater = (window: BrowserWindow): void => {
     autoUpdater.on('update-available', (info) => {
+        /**
+         * Handles an available update and notifies the renderer process.
+         */
         sendUpdateEvent(window, 'update:available', {
             version: info.version
         });
     });
 
     autoUpdater.on('download-progress', (progress) => {
+        /**
+         * Handles update download progress and notifies the renderer process.
+         */
         sendUpdateEvent(window, 'update:progress', {
             percent: progress.percent
         });
     });
 
     autoUpdater.on('update-downloaded', (info) => {
+        /**
+         * Handles a completed update download and notifies the renderer process.
+         */
         sendUpdateEvent(window, 'update:downloaded', {
             version: info.version
         });
     });
 
     ipcMain.on('update:install', () => {
-        autoUpdater.quitAndInstall();
+        /**
+         * Installs the downloaded update silently and relaunches the application.
+         */
+        autoUpdater.quitAndInstall(true, true);
     });
 };
 
@@ -52,8 +64,6 @@ export const setupUpdater = (window: BrowserWindow): void => {
 export const checkForUpdates = async (): Promise<void> => {
     try {
         await autoUpdater.checkForUpdates();
-    } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to check for updates:', error);
-    }
+    // eslint-disable-next-line no-empty
+    } catch { }
 };

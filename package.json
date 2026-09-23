@@ -3,7 +3,7 @@
   "description": "🧹 A lightweight Windows Electron app for scanning Steam game libraries and safely removing unnecessary leftover files.",
   "author": "tuty",
   "private": true,
-  "version": "1.1.5",
+  "version": "1.1.6",
   "license": "PolyForm-Noncommercial-1.0.0",
   "type": "module",
   "main": "dist-electron/main.js",
@@ -72,7 +72,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "concurrently": "^10.0.0",
     "cspell": "^9.8.0",
-    "electron": "latest",
+    "electron": "^44.4.4",
     "electron-builder": "^26.15.3",
     "eslint": "^10.10.0",
     "eslint-plugin-jsdoc": "^63.3.3",
@@ -83,7 +83,7 @@
     "stylelint": "^17.15.0",
     "stylelint-config-standard": "^40.0.0",
     "typescript": "~6.0.2",
-    "typescript-eslint": "^8.69.0",
+    "typescript-eslint": "^8.70.1",
     "vite": "^8.3.0",
     "vite-plugin-electron": "^1.1.2"
   }
