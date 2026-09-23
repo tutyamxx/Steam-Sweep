@@ -1,16 +1,25 @@
-import { execFileSync } from 'node:child_process';
-import fs from 'node:fs';
+import { jest } from '@jest/globals';
 import path from 'node:path';
-import { findSteamInstall } from './discovery.js';
-import { resolveActualPath } from '../utils/utils.js';
 
-jest.mock('node:child_process', () => ({ execFileSync: jest.fn() }));
-jest.mock('node:fs', () => ({ existsSync: jest.fn() }));
-jest.mock('../utils/utils.js', () => ({ resolveActualPath: jest.fn() }));
+const mockedExecFileSync = jest.fn();
+const mockedExistsSync = jest.fn();
+const mockedResolveActualPath = jest.fn();
 
-const mockedExecFileSync = jest.mocked(execFileSync);
-const mockedExistsSync = jest.mocked(fs.existsSync);
-const mockedResolveActualPath = jest.mocked(resolveActualPath);
+jest.unstable_mockModule('node:child_process', () => ({
+    execFileSync: mockedExecFileSync
+}));
+
+jest.unstable_mockModule('node:fs', () => ({
+    default: {
+        existsSync: mockedExistsSync
+    }
+}));
+
+jest.unstable_mockModule('../utils/utils.js', () => ({
+    resolveActualPath: mockedResolveActualPath
+}));
+
+const { findSteamInstall } = await import('./discovery.js');
 
 describe('findSteamInstall', () => {
     beforeEach(() => {

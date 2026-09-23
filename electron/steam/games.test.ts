@@ -1,16 +1,19 @@
-import fs from 'node:fs';
+import { jest } from '@jest/globals';
 import path from 'node:path';
-import { findSteamManifests } from './manifests.js';
 
-jest.mock('node:fs', () => ({
-    existsSync: jest.fn(),
-    readdirSync: jest.fn(),
-    readFileSync: jest.fn()
+const mockedExistsSync = jest.fn();
+const mockedReaddirSync = jest.fn();
+const mockedReadFileSync = jest.fn();
+
+jest.unstable_mockModule('node:fs', () => ({
+    default: {
+        existsSync: mockedExistsSync,
+        readdirSync: mockedReaddirSync,
+        readFileSync: mockedReadFileSync
+    }
 }));
 
-const mockedExistsSync = jest.mocked(fs.existsSync);
-const mockedReaddirSync = fs.readdirSync as unknown as jest.MockedFunction<() => string[]>;
-const mockedReadFileSync = jest.mocked(fs.readFileSync);
+const { findSteamManifests } = await import('./manifests.js');
 
 describe('findSteamManifests', () => {
     const steamAppsPath = 'C:\\Steam\\steamapps';

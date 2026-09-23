@@ -1,18 +1,20 @@
-import { shell } from 'electron';
+import { jest } from '@jest/globals';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { cleanCandidates } from './cleanup.js';
 import type { SteamGame } from '../steam/games.js';
 import type { CleanupCandidate } from '../../types/cleanup.js';
 
-jest.mock('electron', () => ({
-    shell: {
-        trashItem: jest.fn()
-    }
+const mockShell = {
+    trashItem: jest.fn<() => Promise<void>>()
+};
+
+jest.unstable_mockModule('electron', () => ({
+    shell: mockShell
 }));
 
-const mockedTrashItem = jest.mocked(shell.trashItem);
+const { cleanCandidates } = await import('./cleanup.js');
+const mockedTrashItem = mockShell.trashItem;
 
 describe('cleanCandidates', () => {
     let temporaryDirectory: string;

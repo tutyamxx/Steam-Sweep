@@ -10,12 +10,12 @@ const mockIpcRenderer = {
     on: jest.fn()
 };
 
-jest.mock('electron', () => ({
+jest.unstable_mockModule('electron', () => ({
     contextBridge: mockContextBridge,
     ipcRenderer: mockIpcRenderer
 }));
 
-import { steamSweepApi } from './preload.js';
+const { steamSweepApi } = await import('./preload.js');
 
 describe('preload API', () => {
     beforeEach(() => {

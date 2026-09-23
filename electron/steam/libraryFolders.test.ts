@@ -1,14 +1,17 @@
-import fs from 'node:fs';
+import { jest } from '@jest/globals';
 import path from 'node:path';
-import { findSteamLibraries } from './libraryFolders.js';
 
-jest.mock('node:fs', () => ({
-    existsSync: jest.fn(),
-    readFileSync: jest.fn()
+const mockedExistsSync = jest.fn();
+const mockedReadFileSync = jest.fn();
+
+jest.unstable_mockModule('node:fs', () => ({
+    default: {
+        existsSync: mockedExistsSync,
+        readFileSync: mockedReadFileSync
+    }
 }));
 
-const mockedExistsSync = jest.mocked(fs.existsSync);
-const mockedReadFileSync = jest.mocked(fs.readFileSync);
+const { findSteamLibraries } = await import('./libraryFolders.js');
 
 describe('findSteamLibraries', () => {
     const steamPath = 'C:\\Program Files (x86)\\Steam';

@@ -1,21 +1,24 @@
+import { jest } from '@jest/globals';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { scanGame } from './scanner.js';
-import {
-    getDirectorySize,
-    getFileSize,
-    isDirectoryEmpty,
-    isDirectoryReadOnly
-} from '../utils/utils.js';
 import type { SteamGame } from '../steam/games.js';
 
-jest.mock('../utils/utils.js', () => ({
+jest.unstable_mockModule('../utils/utils.js', () => ({
     getDirectorySize: jest.fn(),
     getFileSize: jest.fn(),
     isDirectoryEmpty: jest.fn(),
     isDirectoryReadOnly: jest.fn()
 }));
+
+const { scanGame } = await import('./scanner.js');
+
+const {
+    getDirectorySize,
+    getFileSize,
+    isDirectoryEmpty,
+    isDirectoryReadOnly
+} = await import('../utils/utils.js');
 
 const mockedGetDirectorySize = jest.mocked(getDirectorySize);
 const mockedGetFileSize = jest.mocked(getFileSize);

@@ -1,30 +1,27 @@
+import { jest } from '@jest/globals';
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
-import {
-    getFileSize,
-    getDirectorySize,
-    isDirectoryEmpty,
-    isDirectoryReadOnly,
-    resolveActualPath
-} from './utils.js';
 
-jest.mock('node:fs', () => ({
-    statSync: jest.fn(),
-    readdirSync: jest.fn(),
-    realpathSync: {
-        native: jest.fn()
+const mockedStatSync = jest.fn();
+const mockedReaddirSync = jest.fn();
+const mockedRealpathSync = jest.fn();
+const mockedExecFileSync = jest.fn();
+
+jest.unstable_mockModule('node:fs', () => ({
+    default: {
+        statSync: mockedStatSync,
+        readdirSync: mockedReaddirSync,
+        realpathSync: {
+            native: mockedRealpathSync
+        }
     }
 }));
 
-jest.mock('node:child_process', () => ({
-    execFileSync: jest.fn()
+jest.unstable_mockModule('node:child_process', () => ({
+    execFileSync: mockedExecFileSync
 }));
 
-const mockedStatSync = jest.mocked(fs.statSync);
-const mockedReaddirSync = fs.readdirSync as unknown as jest.Mock;
-const mockedRealpathSync = jest.mocked(fs.realpathSync.native);
-const mockedExecFileSync = jest.mocked(execFileSync);
+const { getFileSize, getDirectorySize, isDirectoryEmpty, isDirectoryReadOnly, resolveActualPath } = await import('./utils.js');
 
 describe('getFileSize', () => {
     beforeEach(() => {

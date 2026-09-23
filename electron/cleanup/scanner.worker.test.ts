@@ -1,25 +1,30 @@
-import { parentPort } from 'node:worker_threads';
-import { scanGame } from './scanner.js';
+import { jest } from '@jest/globals';
 import type { SteamGame } from '../steam/games.js';
 import type { CleanupCandidate } from '../../types/cleanup.js';
 
-jest.mock('node:worker_threads', () => ({
-    parentPort: {
-        postMessage: jest.fn()
-    },
-    workerData: {
-        appId: 123456,
-        name: 'Test Game',
-        installPath: 'C:\\Games\\Test Game',
-        libraryPath: 'C:\\Games'
-    }
+const mockParentPort = {
+    postMessage: jest.fn()
+};
+
+const mockWorkerData: SteamGame = {
+    appId: 123456,
+    name: 'Test Game',
+    installPath: 'C:\\Games\\Test Game',
+    libraryPath: 'C:\\Games'
+};
+
+const mockedScanGame = jest.fn();
+
+jest.unstable_mockModule('node:worker_threads', () => ({
+    parentPort: mockParentPort,
+    workerData: mockWorkerData
 }));
 
-jest.mock('./scanner.js', () => ({
-    scanGame: jest.fn()
+jest.unstable_mockModule('./scanner.js', () => ({
+    scanGame: mockedScanGame
 }));
 
-const mockedScanGame = jest.mocked(scanGame);
+const { parentPort } = await import('node:worker_threads');
 const mockedPostMessage = jest.mocked(parentPort!.postMessage);
 
 describe('scanner worker', () => {
