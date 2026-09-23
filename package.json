@@ -3,13 +3,13 @@
   "description": "🧹 A lightweight Windows Electron app for scanning Steam game libraries and safely removing unnecessary leftover files.",
   "author": "tuty",
   "private": true,
-  "version": "1.1.6",
+  "version": "1.1.7",
   "license": "PolyForm-Noncommercial-1.0.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -p tsconfig.app.json && vite build",
+    "build": "tsc -p tsconfig.json && vite build",
     "build:dir": "npm run build && electron-builder --win --dir",
     "build:installer": "rm -rf release && npm run build && electron-builder --publish never",
     "lint": "eslint .",
@@ -17,7 +17,8 @@
     "stylelint": "stylelint \"src/**/*.css\"",
     "stylelint:fix": "stylelint \"src/**/*.css\" --fix",
     "spellcheck": "cspell .",
-    "spellcheck:fix": "cspell . --words-only"
+    "spellcheck:fix": "cspell . --words-only",
+    "test": "jest --verbose"
   },
   "build": {
     "appId": "com.steamsweep.app",
@@ -66,6 +67,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.13.5",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
@@ -80,8 +82,10 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "globals": "^17.12.0",
+    "jest": "^30.5.2",
     "stylelint": "^17.15.0",
     "stylelint-config-standard": "^40.0.0",
+    "ts-jest": "^29.4.13",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.70.1",
     "vite": "^8.3.0",

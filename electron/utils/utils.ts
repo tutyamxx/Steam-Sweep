@@ -43,6 +43,7 @@ export const getDirectorySize = (directoryPath: string): number | null => {
                 if (size === null) {
                     return null;
                 }
+
                 totalSize += size;
                 continue;
             }
@@ -53,6 +54,7 @@ export const getDirectorySize = (directoryPath: string): number | null => {
                 if (size === null) {
                     return null;
                 }
+
                 totalSize += size;
             }
         }

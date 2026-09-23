@@ -5,7 +5,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { Worker } from 'node:worker_threads';
 
-import { findSteamGames, SteamGame } from './steam/games.js';
+import { findSteamGames, type SteamGame } from './steam/games.js';
 import { findSteamInstall } from './steam/discovery.js';
 import { findSteamLibraries } from './steam/libraryFolders.js';
 import { cleanCandidates } from './cleanup/cleanup.js';
