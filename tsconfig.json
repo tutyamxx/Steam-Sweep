@@ -11,8 +11,7 @@
     "types": [
       "node",
       "jest",
-      "vite/client",
-      "@testing-library/jest-dom"
+      "vite/client"
     ],
     "allowArbitraryExtensions": true,
     "allowImportingTsExtensions": true,
