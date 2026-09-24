@@ -1,9 +1,17 @@
 import { jest } from '@jest/globals';
 
+type EventRegistrar = (event: string, listener: (...args: unknown[]) => void) => void;
+type IpcRegistrar = (channel: string, listener: (...args: unknown[]) => unknown) => void;
+
+const userDataPath = 'C:\\Users\\Test\\AppData\\Roaming\\SteamSweep';
+const repositoryUrl = 'https://github.com/tutyamxx/Steam-Sweep';
+
+const mockEventRegistrar = () => jest.fn<EventRegistrar>();
+
 const mockApp = {
     getPath: jest.fn<(name: string) => string>(),
     whenReady: jest.fn<() => Promise<void>>(),
-    on: jest.fn<(event: string, listener: (...args: unknown[]) => void) => void>(),
+    on: mockEventRegistrar(),
     quit: jest.fn()
 };
 
@@ -18,10 +26,10 @@ const mockWindow = {
     show: jest.fn(),
     loadURL: jest.fn<(url: string) => void>(),
     loadFile: jest.fn<(filePath: string) => void>(),
-    on: jest.fn<(event: string, listener: (...args: unknown[]) => void) => void>(),
-    once: jest.fn<(event: string, listener: (...args: unknown[]) => void) => void>(),
+    on: mockEventRegistrar(),
+    once: mockEventRegistrar(),
     webContents: {
-        on: jest.fn<(event: string, listener: (...args: unknown[]) => void) => void>()
+        on: mockEventRegistrar()
     }
 };
 
@@ -40,8 +48,8 @@ class MockBrowserWindow {
 }
 
 const mockIpcMain = {
-    handle: jest.fn<(channel: string, listener: (...args: unknown[]) => unknown) => void>(),
-    on: jest.fn<(channel: string, listener: (...args: unknown[]) => unknown) => void>()
+    handle: jest.fn<IpcRegistrar>(),
+    on: jest.fn<IpcRegistrar>()
 };
 
 const mockMenu = {
@@ -57,7 +65,7 @@ const mockShell = {
 const mockReadFile = jest.fn<(path: string, encoding: string) => Promise<string>>();
 const mockWriteFile = jest.fn<(path: string, data: string, encoding: string) => Promise<void>>();
 const mockWorker = {
-    once: jest.fn<(event: string, listener: (...args: unknown[]) => void) => void>()
+    once: mockEventRegistrar()
 };
 
 const MockWorker = jest.fn<(path: string, options: { workerData: unknown }) => typeof mockWorker>(() => mockWorker);
@@ -100,6 +108,7 @@ jest.unstable_mockModule('./steam/discovery.js', () => ({
 jest.unstable_mockModule('./steam/libraryFolders.js', () => ({
     findSteamLibraries: mockFindSteamLibraries
 }));
+
 jest.unstable_mockModule('./cleanup/cleanup.js', () => ({
     cleanCandidates: mockCleanCandidates
 }));
@@ -119,61 +128,83 @@ Object.defineProperty(process, 'resourcesPath', {
     configurable: true
 });
 
-mockApp.getPath.mockReturnValue('C:\\Users\\Test\\AppData\\Roaming\\SteamSweep');
+mockApp.getPath.mockReturnValue(userDataPath);
 mockReadFile.mockRejectedValue(new Error('State file not found.'));
 mockApp.whenReady.mockResolvedValue(undefined);
 
 await import('./main.js');
 
+/**
+ * Finds the listener the main process registered with `ipcMain.on` for a channel.
+ *
+ * @param channel - IPC channel name.
+ * @returns       The registered listener.
+ */
+const getIpcHandler = (channel: string): ((...args: unknown[]) => unknown) => {
+    const call = mockIpcMain.on.mock.calls.find(([registeredChannel]) => registeredChannel === channel);
+
+    if (!call) {
+        throw new Error(`No ipcMain.on handler registered for "${channel}".`);
+    }
+
+    return call[1];
+};
+
+/**
+ * Invokes a window IPC handler as if it was triggered from the mocked window.
+ *
+ * @param channel - IPC channel name.
+ */
+const invokeWindowHandler = (channel: string): void => {
+    mockBrowserWindow.fromWebContents.mockReturnValue(mockWindow);
+
+    getIpcHandler(channel)({ sender: {} });
+};
+
 describe('main process', () => {
     beforeEach(() => {
-        const mocks = [
+        const { webContents, ...windowMocks } = mockWindow;
+
+        // The app, ipcMain, menu and updater mocks are intentionally not reset:
+        // their assertions rely on calls made while main.js was imported.
+        [
             mockReadFile,
             mockWriteFile,
             mockFindSteamGames,
             mockFindSteamInstall,
             mockFindSteamLibraries,
             mockCleanCandidates,
-            mockBrowserWindow.fromWebContents,
-            mockBrowserWindow.getAllWindows,
-            mockWindow.getSize,
-            mockWindow.isMaximized,
-            mockWindow.minimize,
-            mockWindow.maximize,
-            mockWindow.unmaximize,
-            mockWindow.close,
-            mockWindow.isDestroyed,
-            mockWindow.show,
-            mockWindow.loadURL,
-            mockWindow.loadFile,
-            mockWindow.on,
-            mockWindow.once,
-            mockWindow.webContents.on,
-            mockShell.openPath,
-            mockShell.showItemInFolder,
-            mockShell.openExternal,
+            ...Object.values(mockBrowserWindow),
+            ...Object.values(windowMocks),
+            webContents.on,
+            ...Object.values(mockShell),
             MockWorker,
             mockWorker.once
-        ];
-        mocks.forEach((mock) => mock.mockReset());
-        mockApp.getPath.mockReturnValue('C:\\Users\\Test\\AppData\\Roaming\\SteamSweep');
+        ].forEach((mock) => mock.mockReset());
+
+        mockApp.getPath.mockReturnValue(userDataPath);
     });
 
-    it('registers the Steam scan IPC handler', () => {
-        expect(mockIpcMain.handle).toHaveBeenCalledWith('steam:scan', expect.any(Function));
-    });
-
-    it('registers the Steam clean IPC handler', () => {
-        expect(mockIpcMain.handle).toHaveBeenCalledWith('steam:clean', expect.any(Function));
+    it.each([
+        ['scan', 'steam:scan'],
+        ['clean', 'steam:clean']
+    ])('registers the Steam %s IPC handler', (_name, channel) => {
+        expect(mockIpcMain.handle).toHaveBeenCalledWith(channel, expect.any(Function));
     });
 
     it('registers the window IPC handlers', () => {
-        expect(mockIpcMain.on).toHaveBeenCalledWith('window:minimize', expect.any(Function));
-        expect(mockIpcMain.on).toHaveBeenCalledWith('window:close', expect.any(Function));
-        expect(mockIpcMain.on).toHaveBeenCalledWith('folder:open', expect.any(Function));
-        expect(mockIpcMain.on).toHaveBeenCalledWith('file:show', expect.any(Function));
-        expect(mockIpcMain.on).toHaveBeenCalledWith('repository:open', expect.any(Function));
-        expect(mockIpcMain.on).toHaveBeenCalledWith('window:maximize', expect.any(Function));
+        const channels = [
+            'window:minimize',
+            'window:close',
+            'folder:open',
+            'file:show',
+            'repository:open',
+            'window:maximize'
+        ];
+
+        channels.forEach((channel) => {
+            expect(mockIpcMain.on).toHaveBeenCalledWith(channel, expect.any(Function));
+        });
     });
 
     it('removes the application menu when the application is ready', () => {
@@ -185,62 +216,38 @@ describe('main process', () => {
         expect(mockCheckForUpdates).toHaveBeenCalled();
     });
 
-    it('minimizes the window', () => {
-        const handler = mockIpcMain.on.mock.calls.find(([channel]) => channel === 'window:minimize')?.[1] as (event: { sender: unknown }) => void;
+    it.each([
+        { name: 'minimizes the window', channel: 'window:minimize', action: mockWindow.minimize },
+        { name: 'closes the window', channel: 'window:close', action: mockWindow.close }
+    ])('$name', ({ channel, action }) => {
+        invokeWindowHandler(channel);
 
-        mockBrowserWindow.fromWebContents.mockReturnValue(mockWindow);
-
-        handler({ sender: {} });
-        expect(mockWindow.minimize).toHaveBeenCalled();
+        expect(action).toHaveBeenCalled();
     });
 
-    it('closes the window', () => {
-        const handler = mockIpcMain.on.mock.calls.find(([channel]) => channel === 'window:close')?.[1] as (event: { sender: unknown }) => void;
+    it.each([
+        { name: 'opens a folder', channel: 'folder:open', argument: 'C:\\Steam', action: mockShell.openPath },
+        { name: 'shows a file in Explorer', channel: 'file:show', argument: 'C:\\Steam\\test.log', action: mockShell.showItemInFolder }
+    ])('$name', ({ channel, argument, action }) => {
+        getIpcHandler(channel)({}, argument);
 
-        mockBrowserWindow.fromWebContents.mockReturnValue(mockWindow);
-
-        handler({ sender: {} });
-        expect(mockWindow.close).toHaveBeenCalled();
-    });
-
-    it('opens a folder', () => {
-        const handler = mockIpcMain.on.mock.calls.find(([channel]) => channel === 'folder:open')?.[1] as (event: unknown, folderPath: string) => void;
-
-        handler({}, 'C:\\Steam');
-        expect(mockShell.openPath).toHaveBeenCalledWith('C:\\Steam');
-    });
-
-    it('shows a file in Explorer', () => {
-        const handler = mockIpcMain.on.mock.calls.find(([channel]) => channel === 'file:show')?.[1] as (event: unknown, filePath: string) => void;
-
-        handler({}, 'C:\\Steam\\test.log');
-        expect(mockShell.showItemInFolder).toHaveBeenCalledWith('C:\\Steam\\test.log');
+        expect(action).toHaveBeenCalledWith(argument);
     });
 
     it('opens the SteamSweep repository', () => {
-        const handler = mockIpcMain.on.mock.calls.find(([channel]) => channel === 'repository:open')?.[1] as () => void;
+        getIpcHandler('repository:open')();
 
-        handler();
-        expect(mockShell.openExternal).toHaveBeenCalledWith('https://github.com/tutyamxx/Steam-Sweep');
+        expect(mockShell.openExternal).toHaveBeenCalledWith(repositoryUrl);
     });
 
-    it('maximizes the window when it is not maximized', () => {
-        const handler = mockIpcMain.on.mock.calls.find(([channel]) => channel === 'window:maximize')?.[1] as (event: { sender: unknown }) => void;
+    it.each([
+        { name: 'maximizes the window when it is not maximized', isMaximized: false, action: mockWindow.maximize },
+        { name: 'restores the window when it is maximized', isMaximized: true, action: mockWindow.unmaximize }
+    ])('$name', ({ isMaximized, action }) => {
+        mockWindow.isMaximized.mockReturnValue(isMaximized);
 
-        mockBrowserWindow.fromWebContents.mockReturnValue(mockWindow);
-        mockWindow.isMaximized.mockReturnValue(false);
+        invokeWindowHandler('window:maximize');
 
-        handler({ sender: {} });
-        expect(mockWindow.maximize).toHaveBeenCalled();
-    });
-
-    it('restores the window when it is maximized', () => {
-        const handler = mockIpcMain.on.mock.calls.find(([channel]) => channel === 'window:maximize')?.[1] as (event: { sender: unknown }) => void;
-
-        mockBrowserWindow.fromWebContents.mockReturnValue(mockWindow);
-        mockWindow.isMaximized.mockReturnValue(true);
-
-        handler({ sender: {} });
-        expect(mockWindow.unmaximize).toHaveBeenCalled();
+        expect(action).toHaveBeenCalled();
     });
 });

@@ -23,43 +23,25 @@ export interface SteamLibrary {
  * @returns         An array containing all discovered Steam libraries.
  */
 export const findSteamLibraries = (steamPath: string): SteamLibrary[] => {
+    const libraryFoldersPath = path.join(steamPath, 'steamapps', 'libraryfolders.vdf');
+    let contents = '';
+
+    try {
+        contents = fs.existsSync(libraryFoldersPath) ? fs.readFileSync(libraryFoldersPath, 'utf8') : '';
+    } catch {
+        // --| Unreadable file: only the main Steam library is checked.
+    }
+
+    const registeredPaths = Array.from(contents.matchAll(/"path"\s+"([^"]+)"/gi), (match) => match?.[1])
+        .filter((libraryPath): libraryPath is string => Boolean(libraryPath));
     const libraries = new Map<string, SteamLibrary>();
 
-    /**
-     * Adds a Steam library when its steamapps directory exists.
-     *
-     * @param libraryPath - Absolute path to the Steam library.
-     */
-    const addLibrary = (libraryPath: string): void => {
+    for (const libraryPath of [steamPath, ...registeredPaths]) {
         const normalisedPath = path.normalize(libraryPath);
         const steamAppsPath = path.join(normalisedPath, 'steamapps');
 
-        if (!fs.existsSync(steamAppsPath)) {
-            return;
-        }
-
-        libraries.set(normalisedPath.toLowerCase(), {
-            path: normalisedPath,
-            steamAppsPath
-        });
-    };
-
-    addLibrary(steamPath);
-
-    const libraryFoldersPath = path.join(steamPath, 'steamapps', 'libraryfolders.vdf');
-
-    if (!fs.existsSync(libraryFoldersPath)) {
-        return [...libraries.values()];
-    }
-
-    const contents = fs.readFileSync(libraryFoldersPath, 'utf8');
-    const pathMatches = contents.matchAll(/"path"\s+"([^"]+)"/gi);
-
-    for (const match of pathMatches) {
-        const libraryPath = match?.[1];
-
-        if (libraryPath) {
-            addLibrary(libraryPath);
+        if (fs.existsSync(steamAppsPath)) {
+            libraries.set(normalisedPath.toLowerCase(), { path: normalisedPath, steamAppsPath });
         }
     }
 

@@ -23,74 +23,112 @@ import {
     temporaryExtensions
 } from './rules.js';
 
-const fileRules: {
-    extensions: string[];
+/**
+ * Describes how a matched entry is reported as a cleanup candidate.
+ */
+interface RuleResult {
     type: CleanupCandidate['type'];
     confidence: CleanupCandidate['confidence'];
     reason: string;
-}[] = [
-    {
-        extensions: temporaryExtensions,
-        type: 'temp-file',
-        confidence: 'safe',
-        reason: 'Temporary file inside a Steam game installation.'
-    },
-    {
-        extensions: crashDumpExtensions,
-        type: 'crash-dump',
-        confidence: 'safe',
-        reason: 'Crash dump inside a Steam game installation.'
-    },
-    {
-        extensions: logExtensions,
-        type: 'log',
-        confidence: 'review',
-        reason: 'Log file inside a Steam game installation.'
-    },
-    {
-        extensions: backupExtensions,
-        type: 'backup',
-        confidence: 'review',
-        reason: 'Backup file inside a Steam game installation.'
+}
+
+/**
+ * A rule matched by exact key (file extension or directory name).
+ */
+interface KeyedRule extends RuleResult {
+    keys: string[];
+}
+
+/**
+ * A rule matched by regular expressions against the lowercase file name.
+ */
+interface PatternRule extends RuleResult {
+    patterns: RegExp[];
+}
+
+/**
+ * Builds a consistent reason string for entries found inside a game installation.
+ *
+ * @param subject - What was found, e.g. "Temporary file".
+ * @returns       - Reason shown to the user.
+ */
+const inGame = (subject: string): string => `${subject} inside a Steam game installation.`;
+
+/**
+ * Compiles keyed rules into a Map for O(1) lookups.
+ * Earlier rules win when the same key appears more than once.
+ *
+ * @param rules - Rules in priority order.
+ * @returns     - Lookup table from key to rule result.
+ */
+const buildLookup = (rules: KeyedRule[]): Map<string, RuleResult> => {
+    const lookup = new Map<string, RuleResult>();
+
+    for (const { keys, ...result } of rules) {
+        for (const key of keys) {
+            if (!lookup.has(key)) {
+                lookup.set(key, result);
+            }
+        }
     }
+
+    return lookup;
+};
+
+const fileRulesByExtension = buildLookup([
+    { keys: temporaryExtensions, type: 'temp-file', confidence: 'safe', reason: inGame('Temporary file') },
+    { keys: crashDumpExtensions, type: 'crash-dump', confidence: 'safe', reason: inGame('Crash dump') },
+    { keys: logExtensions, type: 'log', confidence: 'review', reason: inGame('Log file') },
+    { keys: backupExtensions, type: 'backup', confidence: 'review', reason: inGame('Backup file') }
+]);
+
+const directoryRulesByName = buildLookup([
+    { keys: temporaryDirectoryNames, type: 'temp-folder', confidence: 'safe', reason: inGame('Temporary directory') },
+    { keys: logDirectoryNames, type: 'log', confidence: 'review', reason: inGame('Log directory') },
+    { keys: crashDirectoryNames, type: 'crash-dump', confidence: 'review', reason: inGame('Crash report directory') },
+    { keys: installerDirectoryNames, type: 'installer', confidence: 'review', reason: 'Directory commonly used for installers or redistributables.' }
+]);
+
+const installerPatternRules: PatternRule[] = [
+    { patterns: installerPatterns, type: 'installer', confidence: 'review', reason: 'Executable appears to be a standalone installer.' },
+    { patterns: installerArchivePatterns, type: 'installer', confidence: 'review', reason: 'File appears to be a bundled installer or redistributable.' }
 ];
 
-const directoryRules: {
-    names: string[];
-    type: CleanupCandidate['type'];
-    confidence: CleanupCandidate['confidence'];
-    reason: string;
-}[] = [
-    {
-        names: temporaryDirectoryNames,
-        type: 'temp-folder',
-        confidence: 'safe',
-        reason: 'Temporary directory inside a Steam game installation.'
-    },
-    {
-        names: logDirectoryNames,
-        type: 'log',
-        confidence: 'review',
-        reason: 'Log directory inside a Steam game installation.'
-    },
-    {
-        names: crashDirectoryNames,
-        type: 'crash-dump',
-        confidence: 'review',
-        reason: 'Crash report directory inside a Steam game installation.'
-    },
-    {
-        names: installerDirectoryNames,
-        type: 'installer',
-        confidence: 'review',
-        reason: 'Directory commonly used for installers or redistributables.'
+const emptyFolderResult: RuleResult = {
+    type: 'empty-folder',
+    confidence: 'safe',
+    reason: inGame('Empty directory')
+};
+
+/**
+ * Finds the cleanup rule for a file, cheapest checks first.
+ *
+ * @param lowerCaseName - Lowercase file name.
+ * @returns             - Matching rule result, if any.
+ */
+const matchFile = (lowerCaseName: string): RuleResult | undefined => {
+    const extensionRule = fileRulesByExtension.get(path.extname(lowerCaseName));
+
+    if (extensionRule) {
+        return extensionRule;
     }
-];
+
+    for (const rule of installerPatternRules) {
+        for (const pattern of rule.patterns) {
+            if (pattern.test(lowerCaseName)) {
+                return rule;
+            }
+        }
+    }
+
+    return undefined;
+};
 
 /**
  * Scans an installed Steam game for potentially unnecessary files and folders.
  *
  * The scanner is read-only and never modifies the filesystem.
+ * File sizes are only queried for entries that match a rule.
  *
  * @param game - Installed Steam game to scan.
  * @returns    Cleanup candidates discovered inside the game directory.
@@ -98,26 +136,14 @@ const directoryRules: {
 export const scanGame = (game: SteamGame): CleanupCandidate[] => {
     const candidates: CleanupCandidate[] = [];
 
-    if (!fs.existsSync(game.installPath)) {
-        return candidates;
-    }
-
     /**
      * Adds a cleanup candidate to the result list.
      *
      * @param candidatePath - Absolute path to the candidate.
-     * @param type          - Cleanup candidate type.
      * @param size          - Candidate size in bytes.
-     * @param confidence    - Candidate confidence level.
-     * @param reason        - Explanation shown to the user.
+     * @param result        - Type, confidence and reason to report.
      */
-    const addCandidate = (
-        candidatePath: string,
-        type: CleanupCandidate['type'],
-        size: number,
-        confidence: CleanupCandidate['confidence'],
-        reason: string
-    ): void => {
+    const addCandidate = (candidatePath: string, size: number, { type, confidence, reason }: RuleResult): void => {
         candidates.push({
             id: candidatePath,
             gameId: game.appId,
@@ -137,55 +163,41 @@ export const scanGame = (game: SteamGame): CleanupCandidate[] => {
      * @param filePath - Absolute path to the file.
      */
     const scanFileEntry = (fileName: string, filePath: string): void => {
-        const lowerCaseName = fileName.toLowerCase();
-        const extension = path.extname(lowerCaseName);
+        const rule = matchFile(fileName.toLowerCase());
+
+        if (!rule) {
+            return;
+        }
+
         const size = getFileSize(filePath);
 
-        if (size === null) {
-            return;
-        }
-
-        const rule = fileRules.find((fileRule) => fileRule.extensions.includes(extension));
-
-        if (rule) {
-            addCandidate(filePath, rule.type, size, rule.confidence, rule.reason);
-
-            return;
-        }
-
-        if (installerPatterns.some((pattern) => pattern.test(lowerCaseName))) {
-            addCandidate(filePath, 'installer', size, 'review', 'Executable appears to be a standalone installer.');
-
-            return;
-        }
-
-        if (installerArchivePatterns.some((pattern) => pattern.test(lowerCaseName))) {
-            addCandidate(filePath, 'installer', size, 'review', 'File appears to be a bundled installer or redistributable.');
+        if (size !== null) {
+            addCandidate(filePath, size, rule);
         }
     };
 
     /**
-     * Processes a discovered directory.
+     * Processes a discovered directory: reports it if it matches a rule or is empty,
+     * otherwise recurses into it.
      *
-     * @param entry         - Filesystem directory entry.
+     * @param directoryName - Directory name.
      * @param directoryPath - Absolute path to the directory.
      */
-    const scanDirectoryEntry = (entry: fs.Dirent, directoryPath: string): void => {
-        const directoryName = entry.name.toLowerCase();
-        const rule = directoryRules.find((directoryRule) => directoryRule.names.includes(directoryName));
+    const scanDirectoryEntry = (directoryName: string, directoryPath: string): void => {
+        const rule = directoryRulesByName.get(directoryName.toLowerCase());
 
         if (rule) {
             const size = getDirectorySize(directoryPath);
 
             if (size !== null) {
-                addCandidate(directoryPath, rule.type, size, rule.confidence, rule.reason);
+                addCandidate(directoryPath, size, rule);
             }
 
             return;
         }
 
         if (isDirectoryEmpty(directoryPath) && !isDirectoryReadOnly(directoryPath)) {
-            addCandidate(directoryPath, 'empty-folder', 0, 'safe', 'Empty directory inside a Steam game installation.');
+            addCandidate(directoryPath, 0, emptyFolderResult);
 
             return;
         }
@@ -210,18 +222,15 @@ export const scanGame = (game: SteamGame): CleanupCandidate[] => {
         }
 
         for (const entry of entries) {
-            const entryPath = path.join(directoryPath, entry.name);
-
             if (entry.isSymbolicLink()) {
                 continue;
             }
 
-            if (entry.isDirectory()) {
-                scanDirectoryEntry(entry, entryPath);
-                continue;
-            }
+            const entryPath = directoryPath + path.sep + entry.name;
 
-            if (entry.isFile()) {
+            if (entry.isDirectory()) {
+                scanDirectoryEntry(entry.name, entryPath);
+            } else if (entry.isFile()) {
                 scanFileEntry(entry.name, entryPath);
             }
         }

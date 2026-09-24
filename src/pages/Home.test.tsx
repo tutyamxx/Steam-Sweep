@@ -4,6 +4,12 @@ import { jest } from '@jest/globals';
 import { Home } from './Home';
 import type { CleanupCandidate, CleanupResult } from '../../types/cleanup';
 
+interface UpdateCallbacks {
+    available?: (version: string) => void;
+    progress?: (percent: number) => void;
+    downloaded?: (version: string) => void;
+}
+
 Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
     value: jest.fn(),
     writable: true
@@ -47,68 +53,76 @@ Object.defineProperty(window, 'steamSweep', {
     configurable: true
 });
 
+const steamPath = 'C:\\Program Files (x86)\\Steam';
+const logPath = 'C:\\Games\\Test Game\\game.log';
+const tempPath = 'C:\\Games\\Test Game\\temp';
+const scanButton = /Scan Steam Libraries/i;
+const recycleBinDialogName = /Move items to Recycle Bin/i;
+const updateDialogName = 'SteamSweep Update';
+
+const baseCandidate = {
+    gameId: 123456,
+    gameName: 'Test Game',
+    confidence: 'safe'
+} as const;
+
 const candidates: CleanupCandidate[] = [
-    {
-        id: 'game-log',
-        gameId: 123456,
-        gameName: 'Test Game',
-        path: 'C:\\Games\\Test Game\\game.log',
-        type: 'log',
-        size: 4096,
-        confidence: 'safe',
-        reason: 'Log file'
-    },
-    {
-        id: 'game-temp',
-        gameId: 123456,
-        gameName: 'Test Game',
-        path: 'C:\\Games\\Test Game\\temp',
-        type: 'temp-folder',
-        size: 2048,
-        confidence: 'safe',
-        reason: 'Temporary folder'
-    }
+    { ...baseCandidate, id: 'game-log', path: logPath, type: 'log', size: 4096, reason: 'Log file' },
+    { ...baseCandidate, id: 'game-temp', path: tempPath, type: 'temp-folder', size: 2048, reason: 'Temporary folder' }
 ];
 
 const scanResult = {
-    steamPath: 'C:\\Program Files (x86)\\Steam',
+    steamPath,
     candidates
 };
 
-let updateAvailableCallback: ((version: string) => void) | undefined;
-let updateProgressCallback: ((percent: number) => void) | undefined;
-let updateDownloadedCallback: ((version: string) => void) | undefined;
+let updateCallbacks: UpdateCallbacks = {};
+
+/**
+ * Creates a mock implementation that stores the callback registered by the component.
+ *
+ * @param key - Update callback slot to store the registered callback in.
+ * @returns   Mock implementation for the matching `onUpdate*` function.
+ */
+const captureCallback = <Key extends keyof UpdateCallbacks>(key: Key) => (callback: unknown): void => {
+    updateCallbacks[key] = callback as UpdateCallbacks[Key];
+};
 
 const setup = (): void => {
-    mockScan.mockReset();
-    mockClean.mockReset();
-    mockMinimize.mockReset();
-    mockClose.mockReset();
-    mockOpenFolder.mockReset();
-    mockShowFile.mockReset();
-    mockInstallUpdate.mockReset();
-    mockOpenRepository.mockReset();
-    mockOnUpdateAvailable.mockReset();
-    mockOnUpdateProgress.mockReset();
-    mockOnUpdateDownloaded.mockReset();
+    [
+        mockScan,
+        mockClean,
+        mockMinimize,
+        mockClose,
+        mockOpenFolder,
+        mockShowFile,
+        mockInstallUpdate,
+        mockOpenRepository,
+        mockOnUpdateAvailable,
+        mockOnUpdateProgress,
+        mockOnUpdateDownloaded
+    ].forEach((mock) => mock.mockReset());
+
     mockScan.mockResolvedValue(scanResult);
     mockClean.mockResolvedValue({
         results: []
     });
-    updateAvailableCallback = undefined;
-    updateProgressCallback = undefined;
-    updateDownloadedCallback = undefined;
-    mockOnUpdateAvailable.mockImplementation((callback: unknown) => {
-        updateAvailableCallback = callback as (version: string) => void;
-    });
-    mockOnUpdateProgress.mockImplementation((callback: unknown) => {
-        updateProgressCallback = callback as (percent: number) => void;
-    });
-    mockOnUpdateDownloaded.mockImplementation((callback: unknown) => {
-        updateDownloadedCallback = callback as (version: string) => void;
-    });
+    updateCallbacks = {};
+    mockOnUpdateAvailable.mockImplementation(captureCallback('available'));
+    mockOnUpdateProgress.mockImplementation(captureCallback('progress'));
+    mockOnUpdateDownloaded.mockImplementation(captureCallback('downloaded'));
 
     render(<Home />);
+};
+
+/**
+ * Clicks a button found by its accessible name.
+ *
+ * @param name  - Accessible name of the button.
+ * @param scope - Queries to search in, defaults to the whole screen.
+ */
+const clickButton = (name: string | RegExp, scope: Pick<typeof screen, 'getByRole'> = screen): void => {
+    fireEvent.click(scope.getByRole('button', { name }));
 };
 
 const selectCandidate = async (path: string): Promise<HTMLInputElement> => {
@@ -122,6 +136,57 @@ const selectCandidate = async (path: string): Promise<HTMLInputElement> => {
     return candidate!.querySelector('input[type="checkbox"]') as HTMLInputElement;
 };
 
+/**
+ * Scans, selects the log candidate and opens the cleanup confirmation dialog.
+ *
+ * @returns The cleanup confirmation dialog.
+ */
+const openCleanupDialog = async (): Promise<HTMLElement> => {
+    clickButton(scanButton);
+    fireEvent.click(await selectCandidate(logPath));
+    clickButton(/Delete Selected/i);
+
+    return screen.getByRole('dialog', { name: recycleBinDialogName });
+};
+
+/**
+ * Confirms the cleanup dialog. Intentionally synchronous: the caller must reach `waitFor`
+ * in the same tick as the click, otherwise the component's async state updates
+ * run outside of `act` and React logs warnings.
+ *
+ * @param dialog - The cleanup confirmation dialog.
+ */
+const confirmCleanup = (dialog: HTMLElement): void => {
+    clickButton('Move to Recycle Bin', within(dialog));
+};
+
+const emitDownloadedUpdate = (): void => {
+    act(() => {
+        updateCallbacks.available?.('1.2.0');
+        updateCallbacks.downloaded?.('1.2.0');
+    });
+};
+
+/**
+ * Scrolls the app container far enough to reveal the back-to-top button.
+ *
+ * @returns The scrolled app container.
+ */
+const scrollApp = (): HTMLElement => {
+    const app = document.querySelector('.app') as HTMLElement;
+
+    Object.defineProperty(app, 'scrollTop', {
+        value: 500,
+        configurable: true
+    });
+
+    act(() => {
+        app.dispatchEvent(new Event('scroll'));
+    });
+
+    return app;
+};
+
 describe('Home', () => {
     beforeEach(() => {
         setup();
@@ -130,50 +195,45 @@ describe('Home', () => {
     it('renders the home page', () => {
         expect(screen.getByText('Steam Sweep')).toBeInTheDocument();
         expect(screen.getByRole('img', { name: 'SteamSweep logo' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /Scan Steam Libraries/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: scanButton })).toBeInTheDocument();
     });
 
     it('registers update listeners', () => {
-        expect(mockOnUpdateAvailable).toHaveBeenCalledTimes(1);
-        expect(mockOnUpdateProgress).toHaveBeenCalledTimes(1);
-        expect(mockOnUpdateDownloaded).toHaveBeenCalledTimes(1);
+        [mockOnUpdateAvailable, mockOnUpdateProgress, mockOnUpdateDownloaded].forEach((listener) => {
+            expect(listener).toHaveBeenCalledTimes(1);
+        });
     });
 
-    it('minimizes the window', () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Minimize' }));
-        expect(mockMinimize).toHaveBeenCalledTimes(1);
-    });
+    it.each([
+        { name: 'minimizes the window', button: 'Minimize', action: mockMinimize },
+        { name: 'closes the window', button: 'Close', action: mockClose },
+        { name: 'opens the GitHub repository', button: 'Open GitHub repository', action: mockOpenRepository }
+    ])('$name', ({ button, action }) => {
+        clickButton(button);
 
-    it('closes the window', () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-        expect(mockClose).toHaveBeenCalledTimes(1);
-    });
-
-    it('opens the GitHub repository', () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Open GitHub repository' }));
-        expect(mockOpenRepository).toHaveBeenCalledTimes(1);
+        expect(action).toHaveBeenCalledTimes(1);
     });
 
     it('scans Steam libraries', async () => {
-        fireEvent.click(screen.getByRole('button', { name: /Scan Steam Libraries/i }));
+        clickButton(scanButton);
 
         await waitFor(() => {
             expect(mockScan).toHaveBeenCalledTimes(1);
         });
 
-        expect(await screen.findByRole('button', { name: 'C:\\Games\\Test Game\\game.log' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'C:\\Games\\Test Game\\temp' })).toBeInTheDocument();
+        expect(await screen.findByRole('button', { name: logPath })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: tempPath })).toBeInTheDocument();
         expect(screen.getByText('Test Game')).toBeInTheDocument();
-        expect(screen.getByText('C:\\Program Files (x86)\\Steam')).toBeInTheDocument();
+        expect(screen.getByText(steamPath)).toBeInTheDocument();
     });
 
     it('opens the Steam folder after scanning', async () => {
-        fireEvent.click(screen.getByRole('button', { name: /Scan Steam Libraries/i }));
+        clickButton(scanButton);
 
-        await selectCandidate('C:\\Games\\Test Game\\game.log');
+        await selectCandidate(logPath);
 
-        fireEvent.click(screen.getByRole('button', { name: 'C:\\Program Files (x86)\\Steam' }));
-        expect(mockOpenFolder).toHaveBeenCalledWith('C:\\Program Files (x86)\\Steam');
+        clickButton(steamPath);
+        expect(mockOpenFolder).toHaveBeenCalledWith(steamPath);
     });
 
     it('does not open the Steam folder before scanning', () => {
@@ -182,9 +242,9 @@ describe('Home', () => {
     });
 
     it('selects a candidate', async () => {
-        fireEvent.click(screen.getByRole('button', { name: /Scan Steam Libraries/i }));
+        clickButton(scanButton);
 
-        const checkbox = await selectCandidate('C:\\Games\\Test Game\\game.log');
+        const checkbox = await selectCandidate(logPath);
 
         expect(checkbox).not.toBeChecked();
         fireEvent.click(checkbox);
@@ -192,28 +252,14 @@ describe('Home', () => {
     });
 
     it('opens the cleanup confirmation when a candidate is selected', async () => {
-        fireEvent.click(screen.getByRole('button', { name: /Scan Steam Libraries/i }));
-
-        const checkbox = await selectCandidate('C:\\Games\\Test Game\\game.log');
-
-        fireEvent.click(checkbox);
-        fireEvent.click(screen.getByRole('button', { name: /Delete Selected/i }));
-        expect(screen.getByRole('dialog', { name: /Move items to Recycle Bin/i })).toBeInTheDocument();
+        expect(await openCleanupDialog()).toBeInTheDocument();
     });
 
     it('cancels cleanup', async () => {
-        fireEvent.click(screen.getByRole('button', { name: /Scan Steam Libraries/i }));
-
-        const checkbox = await selectCandidate('C:\\Games\\Test Game\\game.log');
-
-        fireEvent.click(checkbox);
-        fireEvent.click(screen.getByRole('button', { name: /Delete Selected/i }));
-
-        const dialog = screen.getByRole('dialog', { name: /Move items to Recycle Bin/i });
-        fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+        clickButton('Cancel', within(await openCleanupDialog()));
 
         await waitFor(() => {
-            expect(screen.queryByRole('dialog', { name: /Move items to Recycle Bin/i })).not.toBeInTheDocument();
+            expect(screen.queryByRole('dialog', { name: recycleBinDialogName })).not.toBeInTheDocument();
         });
     });
 
@@ -226,73 +272,51 @@ describe('Home', () => {
                 }
             ]
         });
-        fireEvent.click(screen.getByRole('button', { name: /Scan Steam Libraries/i }));
 
-        const checkbox = await selectCandidate('C:\\Games\\Test Game\\game.log');
-
-        fireEvent.click(checkbox);
-        fireEvent.click(screen.getByRole('button', { name: /Delete Selected/i }));
-
-        const dialog = screen.getByRole('dialog', { name: /Move items to Recycle Bin/i });
-
-        fireEvent.click(within(dialog).getByRole('button', { name: 'Move to Recycle Bin' }));
+        confirmCleanup(await openCleanupDialog());
         await waitFor(() => {
             expect(mockClean).toHaveBeenCalledWith(['game-log']);
         });
         await waitFor(() => {
-            expect(screen.queryByRole('button', { name: 'C:\\Games\\Test Game\\game.log' })).not.toBeInTheDocument();
+            expect(screen.queryByRole('button', { name: logPath })).not.toBeInTheDocument();
         });
     });
 
-    it('shows an error when cleanup returns failed results', async () => {
-        mockClean.mockResolvedValue({
-            results: [
-                {
-                    id: 'game-log',
-                    success: false,
-                    error: 'Unable to delete file'
-                }
-            ]
-        });
-        fireEvent.click(screen.getByRole('button', { name: /Scan Steam Libraries/i }));
+    it.each([
+        {
+            name: 'shows an error when cleanup returns failed results',
+            arrange: () => mockClean.mockResolvedValue({
+                results: [
+                    {
+                        id: 'game-log',
+                        success: false,
+                        error: 'Unable to delete file'
+                    }
+                ]
+            }),
+            message: 'Unable to delete file'
+        },
+        {
+            name: 'shows an error when cleanup throws',
+            arrange: () => mockClean.mockRejectedValue(new Error('Cleanup failed')),
+            message: 'Cleanup failed. No selected items were removed from the list.'
+        }
+    ])('$name', async ({ arrange, message }) => {
+        arrange();
 
-        const checkbox = await selectCandidate('C:\\Games\\Test Game\\game.log');
-
-        fireEvent.click(checkbox);
-        fireEvent.click(screen.getByRole('button', { name: /Delete Selected/i }));
-
-        const dialog = screen.getByRole('dialog', { name: /Move items to Recycle Bin/i });
-
-        fireEvent.click(within(dialog).getByRole('button', { name: 'Move to Recycle Bin' }));
-
-        await waitFor(() => {
-            expect(screen.getByRole('alert')).toHaveTextContent('Unable to delete file');
-        });
-    });
-
-    it('shows an error when cleanup throws', async () => {
-        mockClean.mockRejectedValue(new Error('Cleanup failed'));
-        fireEvent.click(screen.getByRole('button', { name: /Scan Steam Libraries/i }));
-
-        const checkbox = await selectCandidate('C:\\Games\\Test Game\\game.log');
-
-        fireEvent.click(checkbox);
-        fireEvent.click(screen.getByRole('button', { name: /Delete Selected/i }));
-        const dialog = screen.getByRole('dialog', { name: /Move items to Recycle Bin/i });
-
-        fireEvent.click(within(dialog).getByRole('button', { name: 'Move to Recycle Bin' }));
+        confirmCleanup(await openCleanupDialog());
 
         await waitFor(() => {
-            expect(screen.getByRole('alert')).toHaveTextContent('Cleanup failed. No selected items were removed from the list.');
+            expect(screen.getByRole('alert')).toHaveTextContent(message);
         });
     });
 
     it('shows an available update', async () => {
         act(() => {
-            updateAvailableCallback?.('1.2.0');
+            updateCallbacks.available?.('1.2.0');
         });
 
-        const dialog = await screen.findByRole('dialog', { name: 'SteamSweep Update' });
+        const dialog = await screen.findByRole('dialog', { name: updateDialogName });
 
         expect(dialog).toHaveTextContent('Version 1.2.0 is available');
         expect(dialog).toHaveTextContent('Downloading update...');
@@ -301,21 +325,18 @@ describe('Home', () => {
 
     it('updates the download progress', async () => {
         act(() => {
-            updateAvailableCallback?.('1.2.0');
-            updateProgressCallback?.(50);
+            updateCallbacks.available?.('1.2.0');
+            updateCallbacks.progress?.(50);
         });
 
-        const dialog = await screen.findByRole('dialog', { name: 'SteamSweep Update' });
+        const dialog = await screen.findByRole('dialog', { name: updateDialogName });
         expect(dialog).toHaveTextContent('50%');
     });
 
     it('shows the downloaded update', async () => {
-        act(() => {
-            updateAvailableCallback?.('1.2.0');
-            updateDownloadedCallback?.('1.2.0');
-        });
+        emitDownloadedUpdate();
 
-        const dialog = await screen.findByRole('dialog', { name: 'SteamSweep Update' });
+        const dialog = await screen.findByRole('dialog', { name: updateDialogName });
 
         expect(dialog).toHaveTextContent('Version 1.2.0 is ready to install.');
         expect(dialog).toHaveTextContent('Restart SteamSweep to complete the update.');
@@ -324,53 +345,29 @@ describe('Home', () => {
     });
 
     it('installs the downloaded update', async () => {
-        act(() => {
-            updateAvailableCallback?.('1.2.0');
-            updateDownloadedCallback?.('1.2.0');
-        });
+        emitDownloadedUpdate();
 
         fireEvent.click(await screen.findByRole('button', { name: 'Restart Now' }));
         expect(mockInstallUpdate).toHaveBeenCalledTimes(1);
     });
 
     it('dismisses the downloaded update', async () => {
-        act(() => {
-            updateAvailableCallback?.('1.2.0');
-            updateDownloadedCallback?.('1.2.0');
-        });
+        emitDownloadedUpdate();
 
         fireEvent.click(await screen.findByRole('button', { name: 'Later' }));
 
         await waitFor(() => {
-            expect(screen.queryByRole('dialog', { name: 'SteamSweep Update' })).not.toBeInTheDocument();
+            expect(screen.queryByRole('dialog', { name: updateDialogName })).not.toBeInTheDocument();
         });
     });
 
     it('shows the back-to-top button after scrolling', async () => {
-        const app = document.querySelector('.app') as HTMLElement;
-
-        Object.defineProperty(app, 'scrollTop', {
-            value: 500,
-            configurable: true
-        });
-
-        act(() => {
-            app.dispatchEvent(new Event('scroll'));
-        });
+        scrollApp();
         expect(await screen.findByRole('button', { name: 'Back to top' })).toBeInTheDocument();
     });
 
     it('scrolls to the top when back-to-top is clicked', async () => {
-        const app = document.querySelector('.app') as HTMLElement;
-
-        Object.defineProperty(app, 'scrollTop', {
-            value: 500,
-            configurable: true
-        });
-
-        act(() => {
-            app.dispatchEvent(new Event('scroll'));
-        });
+        const app = scrollApp();
 
         fireEvent.click(await screen.findByRole('button', { name: 'Back to top' }));
 
