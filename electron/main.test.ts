@@ -76,52 +76,22 @@ const mockCleanCandidates = jest.fn();
 const mockCheckForUpdates = jest.fn<() => Promise<void>>();
 const mockSetupUpdater = jest.fn<(window: typeof mockWindow) => void>();
 
-jest.unstable_mockModule('electron', () => ({
-    app: mockApp,
-    BrowserWindow: MockBrowserWindow,
-    ipcMain: mockIpcMain,
-    Menu: mockMenu,
-    shell: mockShell
-}));
+const moduleMocks: Record<string, () => object> = {
+    electron: () => ({ app: mockApp, BrowserWindow: MockBrowserWindow, ipcMain: mockIpcMain, Menu: mockMenu, shell: mockShell }),
+    'node:fs/promises': () => ({ readFile: mockReadFile, writeFile: mockWriteFile }),
+    'node:url': () => ({ fileURLToPath: jest.fn(() => 'C:\\SteamSweep\\dist-electron\\main.js') }),
+    'node:worker_threads': () => ({ Worker: MockWorker }),
+    './steam/games.js': () => ({ findSteamGames: mockFindSteamGames }),
+    './steam/discovery.js': () => ({ findSteamInstall: mockFindSteamInstall }),
+    './steam/libraryFolders.js': () => ({ findSteamLibraries: mockFindSteamLibraries }),
+    './cleanup/cleanup.js': () => ({ cleanCandidates: mockCleanCandidates }),
+    '../src/utils/utils.js': () => ({ minWindowHeight: 600, minWindowWidth: 800 }),
+    './updater.js': () => ({ checkForUpdates: mockCheckForUpdates, setupUpdater: mockSetupUpdater })
+};
 
-jest.unstable_mockModule('node:fs/promises', () => ({
-    readFile: mockReadFile,
-    writeFile: mockWriteFile
-}));
-
-jest.unstable_mockModule('node:url', () => ({
-    fileURLToPath: jest.fn(() => 'C:\\SteamSweep\\dist-electron\\main.js')
-}));
-
-jest.unstable_mockModule('node:worker_threads', () => ({
-    Worker: MockWorker
-}));
-
-jest.unstable_mockModule('./steam/games.js', () => ({
-    findSteamGames: mockFindSteamGames
-}));
-
-jest.unstable_mockModule('./steam/discovery.js', () => ({
-    findSteamInstall: mockFindSteamInstall
-}));
-
-jest.unstable_mockModule('./steam/libraryFolders.js', () => ({
-    findSteamLibraries: mockFindSteamLibraries
-}));
-
-jest.unstable_mockModule('./cleanup/cleanup.js', () => ({
-    cleanCandidates: mockCleanCandidates
-}));
-
-jest.unstable_mockModule('../src/utils/utils.js', () => ({
-    minWindowHeight: 600,
-    minWindowWidth: 800
-}));
-
-jest.unstable_mockModule('./updater.js', () => ({
-    checkForUpdates: mockCheckForUpdates,
-    setupUpdater: mockSetupUpdater
-}));
+Object.entries(moduleMocks).forEach(([specifier, factory]) => {
+    jest.unstable_mockModule(specifier, factory);
+});
 
 Object.defineProperty(process, 'resourcesPath', {
     value: 'C:\\SteamSweep\\resources',

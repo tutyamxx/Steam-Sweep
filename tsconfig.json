@@ -25,7 +25,8 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "esModuleInterop":true
   },
   "include": [
     "src",

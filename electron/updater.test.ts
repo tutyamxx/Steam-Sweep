@@ -21,16 +21,22 @@ const mockWindow = {
     webContents: mockWebContents
 };
 
-jest.unstable_mockModule('electron', () => ({
-    BrowserWindow: class {},
-    ipcMain: mockIpcMain
-}));
+const moduleMocks: Record<string, () => object> = {
+    electron: () => ({ BrowserWindow: class {}, ipcMain: mockIpcMain }),
+    'electron-updater': () => ({ autoUpdater: mockAutoUpdater })
+};
 
-jest.unstable_mockModule('electron-updater', () => ({
-    autoUpdater: mockAutoUpdater
-}));
+Object.entries(moduleMocks).forEach(([specifier, factory]) => {
+    jest.unstable_mockModule(specifier, factory);
+});
 
 const { setupUpdater, checkForUpdates } = await import('./updater.js');
+
+const rendererEvents = [
+    { event: 'update-available', channel: 'update:available', payload: { version: '1.2.0' } },
+    { event: 'download-progress', channel: 'update:progress', payload: { percent: 57.5 } },
+    { event: 'update-downloaded', channel: 'update:downloaded', payload: { version: '1.2.0' } }
+];
 
 describe('updater', () => {
     beforeEach(() => {
@@ -42,50 +48,36 @@ describe('updater', () => {
         mockWindow.isDestroyed.mockReset();
     });
 
-    it('enables automatic downloading', () => {
-        expect(mockAutoUpdater.autoDownload).toBe(true);
+    it.each([
+        ['automatic downloading', 'autoDownload'],
+        ['automatic installation when the application quits', 'autoInstallOnAppQuit']
+    ] as const)('enables %s', (_name, flag) => {
+        expect(mockAutoUpdater[flag]).toBe(true);
     });
 
-    it('enables automatic installation when the application quits', () => {
-        expect(mockAutoUpdater.autoInstallOnAppQuit).toBe(true);
-    });
-
-    it('registers update event handlers', () => {
+    it.each(rendererEvents)('registers the $event handler', ({ event }) => {
         setupUpdater(mockWindow as never);
-        expect(mockAutoUpdater.on).toHaveBeenCalledWith('update-available', expect.any(Function));
-        expect(mockAutoUpdater.on).toHaveBeenCalledWith('download-progress', expect.any(Function));
-        expect(mockAutoUpdater.on).toHaveBeenCalledWith('update-downloaded', expect.any(Function));
+
+        expect(mockAutoUpdater.on).toHaveBeenCalledWith(event, expect.any(Function));
     });
 
-    it('sends the available update version to the renderer', () => {
+    it.each(rendererEvents)('forwards $event to the renderer as $channel', ({ event, channel, payload }) => {
         mockWindow.isDestroyed.mockReturnValue(false);
         setupUpdater(mockWindow as never);
-        const handler = mockAutoUpdater.on.mock.calls.find(([event]) => event === 'update-available')?.[1] as (info: { version: string }) => void;
-        handler({ version: '1.2.0' });
-        expect(mockWebContents.send).toHaveBeenCalledWith('update:available', { version: '1.2.0' });
+
+        const handler = mockAutoUpdater.on.mock.calls.find(([registered]) => registered === event)?.[1] as (data: unknown) => void;
+        handler(payload);
+
+        expect(mockWebContents.send).toHaveBeenCalledWith(channel, payload);
     });
 
-    it('sends download progress to the renderer', () => {
-        mockWindow.isDestroyed.mockReturnValue(false);
-        setupUpdater(mockWindow as never);
-        const handler = mockAutoUpdater.on.mock.calls.find(([event]) => event === 'download-progress')?.[1] as (progress: { percent: number }) => void;
-        handler({ percent: 57.5 });
-        expect(mockWebContents.send).toHaveBeenCalledWith('update:progress', { percent: 57.5 });
-    });
-
-    it('sends the downloaded update version to the renderer', () => {
-        mockWindow.isDestroyed.mockReturnValue(false);
-        setupUpdater(mockWindow as never);
-        const handler = mockAutoUpdater.on.mock.calls.find(([event]) => event === 'update-downloaded')?.[1] as (info: { version: string }) => void;
-        handler({ version: '1.2.0' });
-        expect(mockWebContents.send).toHaveBeenCalledWith('update:downloaded', { version: '1.2.0' });
-    });
-
-    it('does not send update events when the window is destroyed', () => {
+    it.each(rendererEvents)('does not forward $event when the window is destroyed', ({ event, payload }) => {
         mockWindow.isDestroyed.mockReturnValue(true);
         setupUpdater(mockWindow as never);
-        const handler = mockAutoUpdater.on.mock.calls.find(([event]) => event === 'update-available')?.[1] as (info: { version: string }) => void;
-        handler({ version: '1.2.0' });
+
+        const handler = mockAutoUpdater.on.mock.calls.find(([registered]) => registered === event)?.[1] as (data: unknown) => void;
+        handler(payload);
+
         expect(mockWebContents.send).not.toHaveBeenCalled();
     });
 
@@ -96,19 +88,23 @@ describe('updater', () => {
 
     it('installs the update when update:install is received', () => {
         setupUpdater(mockWindow as never);
+
         const handler = mockIpcMain.on.mock.calls.find(([channel]) => channel === 'update:install')?.[1] as () => void;
         handler();
+
         expect(mockAutoUpdater.quitAndInstall).toHaveBeenCalledWith(true, true);
     });
 
     it('checks for updates', async () => {
         mockAutoUpdater.checkForUpdates.mockResolvedValue(undefined);
+
         await checkForUpdates();
         expect(mockAutoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
     });
 
     it('ignores update check failures', async () => {
         mockAutoUpdater.checkForUpdates.mockRejectedValue(new Error('Update check failed'));
+
         await expect(checkForUpdates()).resolves.toBeUndefined();
         expect(mockAutoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
     });

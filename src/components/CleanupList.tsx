@@ -169,7 +169,7 @@ export const CleanupList = ({
                                                 <button className='candidate-path'
                                                     type='button'
                                                     title='Open in File Explorer'
-                                                    onClick={() => window.steamSweep.window.showFile(candidate.path)}
+                                                    onClick={() => window.steamSweep?.window?.showFile(candidate.path)}
                                                 >
                                                     {candidate.path}
                                                 </button>

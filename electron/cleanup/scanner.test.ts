@@ -54,7 +54,6 @@ describe('scanGame', () => {
 
     it('should return no candidates when the game directory does not exist', () => {
         fs.rmSync(gamePath, { recursive: true, force: true });
-
         expect(scanGame(game)).toEqual([]);
     });
 
