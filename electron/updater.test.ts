@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals';
 
 const mockAutoUpdater = {
-    // -| Starts as true so the flag test proves updater.ts is what turns it off.
+    // -| Flags start opposite to what updater.ts sets, so the flag test proves updater.ts is what changes them.
     autoDownload: true,
-    autoInstallOnAppQuit: false,
+    autoInstallOnAppQuit: true,
     disableDifferentialDownload: false,
     on: jest.fn(),
     quitAndInstall: jest.fn(),
@@ -49,7 +49,7 @@ const loadUpdater = async (options: { packaged?: boolean; mock?: string } = {}) 
 
     mockApp.isPackaged = packaged;
     mockAutoUpdater.autoDownload = true;
-    mockAutoUpdater.autoInstallOnAppQuit = false;
+    mockAutoUpdater.autoInstallOnAppQuit = true;
     mockAutoUpdater.disableDifferentialDownload = false;
 
     if (mock === undefined) {
@@ -107,7 +107,7 @@ describe('updater', () => {
 
     it.each([
         ['automatic downloading', 'autoDownload', false],
-        ['automatic installation when the application quits', 'autoInstallOnAppQuit', true],
+        ['automatic installation when the application quits', 'autoInstallOnAppQuit', false],
         ['differential downloads', 'disableDifferentialDownload', true]
     ] as const)('sets %s to the expected value', (_name, flag, expected) => {
         expect(mockAutoUpdater[flag]).toBe(expected);
