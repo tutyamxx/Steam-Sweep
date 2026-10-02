@@ -29,7 +29,8 @@ const mockWindow = {
     on: mockEventRegistrar(),
     once: mockEventRegistrar(),
     webContents: {
-        on: mockEventRegistrar()
+        on: mockEventRegistrar(),
+        once: mockEventRegistrar()
     }
 };
 
@@ -121,6 +122,22 @@ const getIpcHandler = (channel: string): ((...args: unknown[]) => unknown) => {
 };
 
 /**
+ * Finds the listener the main process registered with `webContents.once` for an event.
+ *
+ * @param event - Web contents event name.
+ * @returns     The registered listener.
+ */
+const getWebContentsOnceListener = (event: string): ((...args: unknown[]) => void) => {
+    const call = mockWindow.webContents.once.mock.calls.find(([registeredEvent]) => registeredEvent === event);
+
+    if (!call) {
+        throw new Error(`No webContents.once listener registered for "${event}".`);
+    }
+
+    return call[1];
+};
+
+/**
  * Invokes a window IPC handler as if it was triggered from the mocked window.
  *
  * @param channel - IPC channel name.
@@ -137,6 +154,7 @@ describe('main process', () => {
 
         // The app, ipcMain, menu and updater mocks are intentionally not reset:
         // their assertions rely on calls made while main.js was imported.
+        // The same goes for webContents.once, which holds the did-finish-load listener.
         [
             mockReadFile,
             mockWriteFile,
@@ -183,7 +201,15 @@ describe('main process', () => {
 
     it('configures the updater when creating the application window', () => {
         expect(mockSetupUpdater).toHaveBeenCalledWith(mockWindow);
-        expect(mockCheckForUpdates).toHaveBeenCalled();
+    });
+
+    it('checks for updates only after the window finishes loading', () => {
+        expect(mockWindow.webContents.once).toHaveBeenCalledWith('did-finish-load', expect.any(Function));
+        expect(mockCheckForUpdates).not.toHaveBeenCalled();
+
+        getWebContentsOnceListener('did-finish-load')();
+
+        expect(mockCheckForUpdates).toHaveBeenCalledTimes(1);
     });
 
     it.each([

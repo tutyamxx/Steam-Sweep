@@ -111,7 +111,14 @@ const createWindow = async (): Promise<void> => {
     });
 
     setupUpdater(window);
-    void checkForUpdates();
+
+    /**
+     * Checks for updates once the renderer has loaded, so the update events
+     * are not sent before the renderer has registered its listeners.
+     */
+    window.webContents.once('did-finish-load', () => {
+        void checkForUpdates();
+    });
 
     /**
      * Saves the window size when the application window is resized.
