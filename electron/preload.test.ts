@@ -7,7 +7,8 @@ const mockContextBridge = {
 const mockIpcRenderer = {
     invoke: jest.fn<(channel: string, ...args: unknown[]) => Promise<unknown>>(),
     send: jest.fn(),
-    on: jest.fn()
+    on: jest.fn(),
+    removeListener: jest.fn()
 };
 
 jest.unstable_mockModule('electron', () => ({
@@ -22,6 +23,7 @@ describe('preload API', () => {
         mockIpcRenderer.invoke.mockReset();
         mockIpcRenderer.send.mockReset();
         mockIpcRenderer.on.mockReset();
+        mockIpcRenderer.removeListener.mockReset();
     });
 
     it('exposes the SteamSweep API through contextBridge', () => {
@@ -94,6 +96,40 @@ describe('preload API', () => {
 
         listener({}, { version: '1.2.0' });
         expect(callback).toHaveBeenCalledWith('1.2.0');
+    });
+
+    it('registers and forwards update:error events', () => {
+        const callback = jest.fn();
+
+        steamSweepApi.onUpdateError(callback);
+        expect(mockIpcRenderer.on).toHaveBeenCalledWith('update:error', expect.any(Function));
+
+        const listener = mockIpcRenderer.on.mock.calls[0]?.[1] as () => void;
+
+        listener();
+        expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+        ['update:available', () => steamSweepApi.onUpdateAvailable(jest.fn())],
+        ['update:progress', () => steamSweepApi.onUpdateProgress(jest.fn())],
+        ['update:downloaded', () => steamSweepApi.onUpdateDownloaded(jest.fn())],
+        ['update:error', () => steamSweepApi.onUpdateError(jest.fn())]
+    ] as const)('removes the %s listener when unsubscribing', (channel, subscribe) => {
+        const unsubscribe = subscribe();
+        const listener = mockIpcRenderer.on.mock.calls[0]?.[1];
+
+        expect(mockIpcRenderer.removeListener).not.toHaveBeenCalled();
+
+        unsubscribe();
+
+        expect(mockIpcRenderer.removeListener).toHaveBeenCalledTimes(1);
+        expect(mockIpcRenderer.removeListener).toHaveBeenCalledWith(channel, listener);
+    });
+
+    it('sends update:download', () => {
+        steamSweepApi.downloadUpdate();
+        expect(mockIpcRenderer.send).toHaveBeenCalledWith('update:download');
     });
 
     it('sends update:install', () => {

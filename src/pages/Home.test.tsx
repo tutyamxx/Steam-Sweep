@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { Home } from './Home';
 import type { CleanupCandidate, CleanupResult } from '../../types/cleanup';
@@ -8,6 +8,7 @@ interface UpdateCallbacks {
     available?: (version: string) => void;
     progress?: (percent: number) => void;
     downloaded?: (version: string) => void;
+    error?: () => void;
 }
 
 Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
@@ -25,15 +26,19 @@ const mockMinimize = jest.fn();
 const mockClose = jest.fn();
 const mockOpenFolder = jest.fn();
 const mockShowFile = jest.fn();
+const mockDownloadUpdate = jest.fn();
 const mockInstallUpdate = jest.fn();
 const mockOpenRepository = jest.fn();
 const mockOnUpdateAvailable = jest.fn();
 const mockOnUpdateProgress = jest.fn();
 const mockOnUpdateDownloaded = jest.fn();
+const mockOnUpdateError = jest.fn();
+const mockUnsubscribe = jest.fn();
 
 const mockSteamSweep = {
     scan: mockScan,
     clean: mockClean,
+    downloadUpdate: mockDownloadUpdate,
     installUpdate: mockInstallUpdate,
     openRepository: mockOpenRepository,
     window: {
@@ -44,7 +49,8 @@ const mockSteamSweep = {
     },
     onUpdateAvailable: mockOnUpdateAvailable,
     onUpdateProgress: mockOnUpdateProgress,
-    onUpdateDownloaded: mockOnUpdateDownloaded
+    onUpdateDownloaded: mockOnUpdateDownloaded,
+    onUpdateError: mockOnUpdateError
 };
 
 Object.defineProperty(window, 'steamSweep', {
@@ -58,7 +64,7 @@ const logPath = 'C:\\Games\\Test Game\\game.log';
 const tempPath = 'C:\\Games\\Test Game\\temp';
 const scanButton = /Scan Steam Libraries/i;
 const recycleBinDialogName = /Move items to Recycle Bin/i;
-const updateDialogName = 'SteamSweep Update';
+const updateDialogName = 'Steam Sweep Update';
 
 const baseCandidate = {
     gameId: 123456,
@@ -81,11 +87,15 @@ let updateCallbacks: UpdateCallbacks = {};
 /**
  * Creates a mock implementation that stores the callback registered by the component.
  *
+ * The real `onUpdate*` functions return an unsubscribe function, so the mock does too.
+ *
  * @param key - Update callback slot to store the registered callback in.
  * @returns   Mock implementation for the matching `onUpdate*` function.
  */
-const captureCallback = <Key extends keyof UpdateCallbacks>(key: Key) => (callback: unknown): void => {
+const captureCallback = <Key extends keyof UpdateCallbacks>(key: Key) => (callback: unknown): (() => void) => {
     updateCallbacks[key] = callback as UpdateCallbacks[Key];
+
+    return mockUnsubscribe;
 };
 
 const setup = (): void => {
@@ -96,11 +106,14 @@ const setup = (): void => {
         mockClose,
         mockOpenFolder,
         mockShowFile,
+        mockDownloadUpdate,
         mockInstallUpdate,
         mockOpenRepository,
         mockOnUpdateAvailable,
         mockOnUpdateProgress,
-        mockOnUpdateDownloaded
+        mockOnUpdateDownloaded,
+        mockOnUpdateError,
+        mockUnsubscribe
     ].forEach((mock) => mock.mockReset());
 
     mockScan.mockResolvedValue(scanResult);
@@ -111,6 +124,7 @@ const setup = (): void => {
     mockOnUpdateAvailable.mockImplementation(captureCallback('available'));
     mockOnUpdateProgress.mockImplementation(captureCallback('progress'));
     mockOnUpdateDownloaded.mockImplementation(captureCallback('downloaded'));
+    mockOnUpdateError.mockImplementation(captureCallback('error'));
 
     render(<Home />);
 };
@@ -160,11 +174,29 @@ const confirmCleanup = (dialog: HTMLElement): void => {
     clickButton('Move to Recycle Bin', within(dialog));
 };
 
+const emitAvailableUpdate = (): void => {
+    act(() => {
+        updateCallbacks.available?.('1.2.0');
+    });
+};
+
 const emitDownloadedUpdate = (): void => {
     act(() => {
         updateCallbacks.available?.('1.2.0');
         updateCallbacks.downloaded?.('1.2.0');
     });
+};
+
+/**
+ * Announces an update and clicks Download Update, leaving the modal in the downloading state.
+ *
+ * @returns The update dialog.
+ */
+const startUpdateDownload = async (): Promise<HTMLElement> => {
+    emitAvailableUpdate();
+    clickButton('Download Update', within(await screen.findByRole('dialog', { name: updateDialogName })));
+
+    return screen.getByRole('dialog', { name: updateDialogName });
 };
 
 /**
@@ -199,9 +231,17 @@ describe('Home', () => {
     });
 
     it('registers update listeners', () => {
-        [mockOnUpdateAvailable, mockOnUpdateProgress, mockOnUpdateDownloaded].forEach((listener) => {
+        [mockOnUpdateAvailable, mockOnUpdateProgress, mockOnUpdateDownloaded, mockOnUpdateError].forEach((listener) => {
             expect(listener).toHaveBeenCalledTimes(1);
         });
+    });
+
+    it('unsubscribes the update listeners when unmounted', () => {
+        expect(mockUnsubscribe).not.toHaveBeenCalled();
+
+        cleanup();
+
+        expect(mockUnsubscribe).toHaveBeenCalledTimes(4);
     });
 
     it.each([
@@ -312,25 +352,45 @@ describe('Home', () => {
     });
 
     it('shows an available update', async () => {
-        act(() => {
-            updateCallbacks.available?.('1.2.0');
-        });
+        emitAvailableUpdate();
 
         const dialog = await screen.findByRole('dialog', { name: updateDialogName });
 
         expect(dialog).toHaveTextContent('Version 1.2.0 is available');
+        expect(dialog).toHaveTextContent('Would you like to download it now?');
+        expect(within(dialog).getByRole('button', { name: 'Download Update' })).toBeInTheDocument();
+        expect(within(dialog).getByRole('button', { name: 'Later' })).toBeInTheDocument();
+        expect(dialog).not.toHaveTextContent('Downloading update...');
+    });
+
+    it('dismisses the available update', async () => {
+        emitAvailableUpdate();
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Later' }));
+
+        await waitFor(() => {
+            expect(screen.queryByRole('dialog', { name: updateDialogName })).not.toBeInTheDocument();
+        });
+        expect(mockDownloadUpdate).not.toHaveBeenCalled();
+    });
+
+    it('starts downloading the update', async () => {
+        const dialog = await startUpdateDownload();
+
+        expect(mockDownloadUpdate).toHaveBeenCalledTimes(1);
         expect(dialog).toHaveTextContent('Downloading update...');
         expect(dialog).toHaveTextContent('0%');
+        expect(within(dialog).queryByRole('button', { name: 'Download Update' })).not.toBeInTheDocument();
     });
 
     it('updates the download progress', async () => {
+        await startUpdateDownload();
+
         act(() => {
-            updateCallbacks.available?.('1.2.0');
             updateCallbacks.progress?.(50);
         });
 
-        const dialog = await screen.findByRole('dialog', { name: updateDialogName });
-        expect(dialog).toHaveTextContent('50%');
+        expect(screen.getByRole('dialog', { name: updateDialogName })).toHaveTextContent('50%');
     });
 
     it('shows the downloaded update', async () => {
@@ -339,15 +399,15 @@ describe('Home', () => {
         const dialog = await screen.findByRole('dialog', { name: updateDialogName });
 
         expect(dialog).toHaveTextContent('Version 1.2.0 is ready to install.');
-        expect(dialog).toHaveTextContent('Restart SteamSweep to complete the update.');
-        expect(screen.getByRole('button', { name: 'Restart Now' })).toBeInTheDocument();
+        expect(dialog).toHaveTextContent('Restart Steam Sweep to complete the update.');
+        expect(screen.getByRole('button', { name: 'Install & Restart' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Later' })).toBeInTheDocument();
     });
 
     it('installs the downloaded update', async () => {
         emitDownloadedUpdate();
 
-        fireEvent.click(await screen.findByRole('button', { name: 'Restart Now' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Install & Restart' }));
         expect(mockInstallUpdate).toHaveBeenCalledTimes(1);
     });
 
@@ -359,6 +419,33 @@ describe('Home', () => {
         await waitFor(() => {
             expect(screen.queryByRole('dialog', { name: updateDialogName })).not.toBeInTheDocument();
         });
+    });
+
+    it('shows an error when the download fails', async () => {
+        await startUpdateDownload();
+
+        act(() => {
+            updateCallbacks.error?.();
+        });
+
+        const dialog = screen.getByRole('dialog', { name: updateDialogName });
+
+        expect(within(dialog).getByRole('alert')).toHaveTextContent('The download failed. Please try again.');
+        expect(within(dialog).getByRole('button', { name: 'Retry Download' })).toBeInTheDocument();
+        expect(dialog).not.toHaveTextContent('Downloading update...');
+    });
+
+    it('retries the download after a failure', async () => {
+        await startUpdateDownload();
+
+        act(() => {
+            updateCallbacks.error?.();
+        });
+
+        clickButton('Retry Download', within(screen.getByRole('dialog', { name: updateDialogName })));
+
+        expect(mockDownloadUpdate).toHaveBeenCalledTimes(2);
+        expect(screen.getByRole('dialog', { name: updateDialogName })).toHaveTextContent('Downloading update...');
     });
 
     it('shows the back-to-top button after scrolling', async () => {

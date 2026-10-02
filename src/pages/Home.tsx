@@ -26,7 +26,9 @@ export const Home = () => {
 
     const [updateVersion, setUpdateVersion] = useState<string | null>(null);
     const [updateProgress, setUpdateProgress] = useState(0);
+    const [updateDownloading, setUpdateDownloading] = useState(false);
     const [updateDownloaded, setUpdateDownloaded] = useState(false);
+    const [updateError, setUpdateError] = useState(false);
 
     const [selectedType, setSelectedType] = useState('');
 
@@ -49,21 +51,37 @@ export const Home = () => {
     }, []);
 
     useEffect(() => {
-        window.steamSweep.onUpdateAvailable((version) => {
+        const offAvailable = window.steamSweep.onUpdateAvailable((version) => {
             setUpdateVersion(version);
             setUpdateProgress(0);
+            setUpdateDownloading(false);
             setUpdateDownloaded(false);
+            setUpdateError(false);
         });
 
-        window.steamSweep.onUpdateProgress((percent) => {
+        const offProgress = window.steamSweep.onUpdateProgress((percent) => {
             setUpdateProgress(percent);
         });
 
-        window.steamSweep.onUpdateDownloaded((version) => {
+        const offDownloaded = window.steamSweep.onUpdateDownloaded((version) => {
             setUpdateVersion(version);
             setUpdateProgress(100);
+            setUpdateDownloading(false);
             setUpdateDownloaded(true);
+            setUpdateError(false);
         });
+
+        const offError = window.steamSweep.onUpdateError(() => {
+            setUpdateDownloading(false);
+            setUpdateError(true);
+        });
+
+        return () => {
+            offAvailable();
+            offProgress();
+            offDownloaded();
+            offError();
+        };
     }, []);
 
     const scrollToTop = (): void => {
@@ -80,6 +98,14 @@ export const Home = () => {
         if (steamPath) {
             window.steamSweep.window.openFolder(steamPath);
         }
+    };
+
+    const handleDownloadUpdate = (): void => {
+        setUpdateError(false);
+        setUpdateProgress(0);
+        setUpdateDownloading(true);
+
+        window.steamSweep.downloadUpdate();
     };
 
     const handleScan = async (): Promise<void> => {
@@ -323,21 +349,21 @@ export const Home = () => {
                         <div className='update-icon'>
                             <SteamSweepLogo className='update-logo' />
                         </div>
-                        <h2 id='update-modal-title'>SteamSweep Update</h2>
+                        <h2 id='update-modal-title'>Steam Sweep Update</h2>
                         {updateDownloaded ? (
                             <>
                                 <p className='update-version'>
                                     Version <strong>{updateVersion}</strong> is ready to install.
                                 </p><br />
                                 <p className='update-detail'>
-                                    Restart SteamSweep to complete the update.
+                                    Restart Steam Sweep to complete the update.
                                 </p><br />
                                 <div className='update-actions'>
                                     <button className='update-button'
                                         type='button'
                                         onClick={() => window.steamSweep.installUpdate()}
                                     >
-                                        Restart Now
+                                        Install &amp; Restart
                                     </button>
                                     <button className='update-later'
                                         type='button'
@@ -347,7 +373,7 @@ export const Home = () => {
                                     </button>
                                 </div>
                             </>
-                        ) : (
+                        ) : updateDownloading ? (
                             <>
                                 <p className='update-version'>
                                     Version <strong>{updateVersion}</strong> is available
@@ -363,6 +389,31 @@ export const Home = () => {
                                 <span className='update-percent'>
                                     {Math.round(updateProgress)}%
                                 </span>
+                            </>
+                        ) : (
+                            <>
+                                <p className='update-version'>
+                                    Version <strong>{updateVersion}</strong> is available
+                                </p><br />
+                                <p className='update-detail'
+                                    role={updateError ? 'alert' : undefined}
+                                >
+                                    {updateError ? 'The download failed. Please try again.' : 'Would you like to download it now?'}
+                                </p><br />
+                                <div className='update-actions'>
+                                    <button className='update-button'
+                                        type='button'
+                                        onClick={handleDownloadUpdate}
+                                    >
+                                        {updateError ? 'Retry Download' : 'Download Update'}
+                                    </button>
+                                    <button className='update-later'
+                                        type='button'
+                                        onClick={() => setUpdateVersion(null)}
+                                    >
+                                        Later
+                                    </button>
+                                </div>
                             </>
                         )}
                     </div>
