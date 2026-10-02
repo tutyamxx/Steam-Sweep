@@ -12,7 +12,9 @@ export const temporaryDirectoryNames = [
     'downloading',
     'temp_download',
     '__installer',
-    'dotNetFx'
+    'dotNetFx',
+    'webcache',
+    'cef_cache'
 ];
 
 /**
@@ -45,7 +47,9 @@ export const crashDirectoryNames = [
     'dumps',
     'bugreport',
     'bugreports',
-    'telemetry'
+    'telemetry',
+    'reports',
+    'wer'
 ];
 
 /**
@@ -78,7 +82,11 @@ export const installerDirectoryNames = [
 export const temporaryExtensions = [
     '.tmp',
     '.temp',
-    '.crdownload'
+    '.crdownload',
+    '.part',
+    '.download',
+    '.pake',
+    '_tmp'
 ];
 
 /**
@@ -100,7 +108,9 @@ export const logExtensions = [
     '.log',
     '.txt_log',
     '.trace',
-    '.etl'
+    '.etl',
+    '.out',
+    '.err'
 ];
 
 /**
@@ -158,5 +168,10 @@ export const installerArchivePatterns = [
     /^eadesktop.*\.(?:exe|msi)$/i,
     /^epicgameslauncher.*\.(?:exe|msi)$/i,
     /^ubisoftconnect.*\.(?:exe|msi)$/i,
-    /^(?:x64|x86|arm64)_.*redist.*\.(?:exe|msi)$/i
+    /^(?:x64|x86|arm64)_.*redist.*\.(?:exe|msi)$/i,
+    /^gfwlivesetup.*\.(?:exe|msi)$/i,
+    /^rgsc.*\.(?:exe|msi)$/i,
+    /^flashplayer.*\.(?:exe|msi)$/i,
+    /^7z.*\.(?:exe|msi)$/i,
+    /^winrar.*\.exe$/i
 ];

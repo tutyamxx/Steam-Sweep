@@ -24,7 +24,9 @@ describe('cleanup patterns', () => {
                 'downloading',
                 'temp_download',
                 '__installer',
-                'dotNetFx'
+                'dotNetFx',
+                'webcache',
+                'cef_cache'
             ]));
         });
 
@@ -53,7 +55,9 @@ describe('cleanup patterns', () => {
                 'dumps',
                 'bugreport',
                 'bugreports',
-                'telemetry'
+                'telemetry',
+                'reports',
+                'wer'
             ]));
         });
 
@@ -74,6 +78,19 @@ describe('cleanup patterns', () => {
                 'support'
             ]));
         });
+
+        it('should not contain duplicate entries', () => {
+            const lists = [
+                temporaryDirectoryNames,
+                logDirectoryNames,
+                crashDirectoryNames,
+                installerDirectoryNames
+            ];
+
+            for (const list of lists) {
+                expect(new Set(list).size).toBe(list.length);
+            }
+        });
     });
 
     describe('file extensions', () => {
@@ -81,7 +98,11 @@ describe('cleanup patterns', () => {
             expect(temporaryExtensions).toEqual(expect.arrayContaining([
                 '.tmp',
                 '.temp',
-                '.crdownload'
+                '.crdownload',
+                '.part',
+                '.download',
+                '.pake',
+                '_tmp'
             ]));
         });
 
@@ -99,7 +120,9 @@ describe('cleanup patterns', () => {
                 '.log',
                 '.txt_log',
                 '.trace',
-                '.etl'
+                '.etl',
+                '.out',
+                '.err'
             ]));
         });
 
@@ -112,6 +135,19 @@ describe('cleanup patterns', () => {
                 '.sav.bak',
                 '~'
             ]));
+        });
+
+        it('should not contain duplicate entries', () => {
+            const lists = [
+                temporaryExtensions,
+                crashDumpExtensions,
+                logExtensions,
+                backupExtensions
+            ];
+
+            for (const list of lists) {
+                expect(new Set(list).size).toBe(list.length);
+            }
         });
     });
 
@@ -134,12 +170,26 @@ describe('cleanup patterns', () => {
             }
         });
 
+        it('should match installer names case-insensitively', () => {
+            const installerNames = [
+                'SETUP.EXE',
+                'Installer.exe',
+                'UNINS000.exe'
+            ];
+
+            for (const installerName of installerNames) {
+                expect(installerPatterns.some((pattern) => pattern.test(installerName))).toBe(true);
+            }
+        });
+
         it('should not match unrelated executable files', () => {
             const executableNames = [
                 'game.exe',
                 'launcher.exe',
                 'steam.exe',
-                'client.exe'
+                'client.exe',
+                'setup.dll',
+                'unins1.exe'
             ];
 
             for (const executableName of executableNames) {
@@ -164,7 +214,30 @@ describe('cleanup patterns', () => {
                 'eadesktop.exe',
                 'epicgameslauncher.exe',
                 'ubisoftconnect.exe',
-                'x64_redist.exe'
+                'x64_redist.exe',
+                'gfwlivesetup.exe',
+                'rgsc.exe',
+                'flashplayer.exe',
+                '7z.exe',
+                '7z2301-x64.exe',
+                'winrar.exe',
+                'winrar-x64-701.exe'
+            ];
+
+            for (const installerName of installerNames) {
+                expect(installerArchivePatterns.some((pattern) => pattern.test(installerName))).toBe(true);
+            }
+        });
+
+        it('should match archive and package extensions where allowed', () => {
+            const installerNames = [
+                'directx.cab',
+                'directx.zip',
+                'dotnet.zip',
+                'openal.zip',
+                'vcredist.msi',
+                'x86_vcredist.msi',
+                'arm64_redist.exe'
             ];
 
             for (const installerName of installerNames) {
@@ -178,7 +251,10 @@ describe('cleanup patterns', () => {
                 'game.zip',
                 'readme.txt',
                 'launcher.exe',
-                'steam_api64.dll'
+                'steam_api64.dll',
+                'winrar.zip',
+                '7z.dll',
+                'flashplayer.txt'
             ];
 
             for (const fileName of fileNames) {
