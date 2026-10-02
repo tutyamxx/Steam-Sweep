@@ -56,7 +56,7 @@ const isValidCandidate = (candidate: CleanupCandidate, games: SteamGame[]): bool
  * @param games      - Currently discovered Steam games.
  * @returns          Individual cleanup results for every requested candidate.
  */
-const cleanCandidates = async (candidates: CleanupCandidate[], games: SteamGame[]): Promise<CleanupResult> => {
+export const cleanCandidates = async (candidates: CleanupCandidate[], games: SteamGame[]): Promise<CleanupResult> => {
     const results: CleanupCandidateResult[] = [];
 
     for (const candidate of candidates) {
@@ -84,5 +84,3 @@ const cleanCandidates = async (candidates: CleanupCandidate[], games: SteamGame[
 
     return { results };
 };
-
-export { cleanCandidates };

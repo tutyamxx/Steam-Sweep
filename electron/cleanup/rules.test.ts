@@ -196,6 +196,12 @@ describe('cleanup patterns', () => {
                 expect(installerPatterns.some((pattern) => pattern.test(executableName))).toBe(false);
             }
         });
+
+        it('should not contain duplicate patterns', () => {
+            const patterns = installerPatterns.map((pattern) => String(pattern));
+
+            expect(new Set(patterns).size).toBe(patterns.length);
+        });
     });
 
     describe('installer archive patterns', () => {
@@ -245,6 +251,47 @@ describe('cleanup patterns', () => {
             }
         });
 
+        it('should match engine prerequisite and runtime installers', () => {
+            const installerNames = [
+                'UE4PrereqSetup_x64.exe',
+                'UE5PrereqSetup_x64.exe',
+                'UEPrereqSetup_x64.exe',
+                'dxwebsetup.exe',
+                'DXWebSetup.exe',
+                'NDP452-KB2901954-Web.exe',
+                'ndp48-x86-x64-allos-enu.exe',
+                'VulkanRT-1.3.268.0-Installer.exe'
+            ];
+
+            for (const installerName of installerNames) {
+                expect(installerArchivePatterns.some((pattern) => pattern.test(installerName))).toBe(true);
+            }
+        });
+
+        it('should match common uninstaller executables', () => {
+            const uninstallerNames = [
+                'uninstall.exe',
+                'uninst.exe',
+                'UNINSTALL.EXE'
+            ];
+
+            for (const uninstallerName of uninstallerNames) {
+                expect(installerArchivePatterns.some((pattern) => pattern.test(uninstallerName))).toBe(true);
+            }
+        });
+
+        it('should match Unity crash handler executables', () => {
+            const crashHandlerNames = [
+                'UnityCrashHandler64.exe',
+                'UnityCrashHandler32.exe',
+                'unitycrashhandler64.exe'
+            ];
+
+            for (const crashHandlerName of crashHandlerNames) {
+                expect(installerArchivePatterns.some((pattern) => pattern.test(crashHandlerName))).toBe(true);
+            }
+        });
+
         it('should not match unrelated archives or executables', () => {
             const fileNames = [
                 'game.exe',
@@ -254,12 +301,26 @@ describe('cleanup patterns', () => {
                 'steam_api64.dll',
                 'winrar.zip',
                 '7z.dll',
-                'flashplayer.txt'
+                'flashplayer.txt',
+                'prereqsetup.exe',
+                'dxwebsetup.dll',
+                'ndp.exe',
+                'vulkaninfo.exe',
+                'uninstaller.exe',
+                'unins.exe',
+                'UnityCrashHandler.exe',
+                'UnityPlayer.dll'
             ];
 
             for (const fileName of fileNames) {
                 expect(installerArchivePatterns.some((pattern) => pattern.test(fileName))).toBe(false);
             }
+        });
+
+        it('should not contain duplicate patterns', () => {
+            const patterns = installerArchivePatterns.map((pattern) => String(pattern));
+
+            expect(new Set(patterns).size).toBe(patterns.length);
         });
     });
 });
