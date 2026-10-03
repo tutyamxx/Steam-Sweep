@@ -5,6 +5,12 @@ const mockedExecFileSync = jest.fn();
 const mockedExistsSync = jest.fn();
 const mockedResolveActualPath = jest.fn();
 
+const REG_OPTIONS = {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+    windowsHide: true
+};
+
 jest.unstable_mockModule('node:child_process', () => ({
     execFileSync: mockedExecFileSync
 }));
@@ -42,10 +48,7 @@ describe('findSteamInstall', () => {
         expect(mockedExecFileSync).toHaveBeenCalledWith(
             'reg',
             ['query', 'HKCU\\Software\\Valve\\Steam', '/v', 'SteamPath'],
-            {
-                encoding: 'utf8',
-                windowsHide: true
-            }
+            REG_OPTIONS
         );
         expect(mockedResolveActualPath).toHaveBeenCalledWith('C:\\Steam');
     });
@@ -64,10 +67,7 @@ describe('findSteamInstall', () => {
             2,
             'reg',
             ['query', 'HKCU\\Software\\Valve\\Steam', '/v', 'SteamExe'],
-            {
-                encoding: 'utf8',
-                windowsHide: true
-            }
+            REG_OPTIONS
         );
         expect(mockedResolveActualPath).toHaveBeenCalledWith('D:\\Games\\Steam');
     });

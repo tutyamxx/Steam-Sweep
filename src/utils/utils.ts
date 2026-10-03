@@ -7,13 +7,13 @@ import type { CleanupCandidate } from '../../types/cleanup';
  * @returns     Formatted file size.
  */
 export const formatBytes = (bytes: number): string => {
-    if (!bytes) {
+    if (!(bytes >= 1)) {
         return '0 B';
     }
 
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const unit = Math.floor(Math.log(bytes) / Math.log(1024));
-    const value = bytes / Math.pow(1024, unit);
+    const unit = Math.min(Math.floor(Math.log2(bytes) / 10), units.length - 1);
+    const value = bytes / 1024 ** unit;
 
     return `${value >= 10 || unit === 0 ? value.toFixed(0) : value.toFixed(2)} ${units[unit]}`;
 };

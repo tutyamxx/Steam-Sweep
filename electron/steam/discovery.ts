@@ -16,24 +16,32 @@ import { resolveActualPath } from '../utils/utils.js';
  * @returns The absolute Steam installation path, or `null` if Steam could not be found.
  */
 export const findSteamInstall = (): string | null => {
-    const registrySteamPath = findSteamPathFromRegistry();
+    const registryPath = findSteamPathFromRegistry();
 
-    if (registrySteamPath && fs.existsSync(registrySteamPath)) {
-        return resolveActualPath(registrySteamPath);
+    if (registryPath) {
+        return registryPath;
     }
 
-    const fallbackPaths = [process.env.ProgramFiles, process.env['ProgramFiles(x86)']]
-        .filter((steamRoot): steamRoot is string => Boolean(steamRoot))
-        .map((programFilesPath) => path.join(programFilesPath, 'Steam'));
+    const fallbackPath = [process.env.ProgramFiles, process.env['ProgramFiles(x86)']]
+        .flatMap((root) => (root ? [path.join(root, 'Steam')] : []))
+        .find((candidate) => fs.existsSync(candidate));
 
-    for (const steamPath of fallbackPaths) {
-        if (fs.existsSync(steamPath)) {
-            return resolveActualPath(steamPath);
-        }
-    }
-
-    return null;
+    return fallbackPath ? resolveActualPath(fallbackPath) : null;
 };
+
+/**
+ * Registry locations where Steam's install information may be stored, as `[key, valueName]` pairs, checked in order.
+ *
+ * - `SteamPath`: Steam directory for the current user.
+ * - `SteamExe`: full path to `steam.exe` for the current user (the directory is derived from it).
+ * - `InstallPath`: machine-wide install directory, in the native and 32-bit (WOW6432Node) hives.
+ */
+const STEAM_REGISTRY_LOCATIONS = [
+    ['HKCU\\Software\\Valve\\Steam', 'SteamPath'],
+    ['HKCU\\Software\\Valve\\Steam', 'SteamExe'],
+    ['HKLM\\Software\\Valve\\Steam', 'InstallPath'],
+    ['HKLM\\SOFTWARE\\WOW6432Node\\Valve\\Steam', 'InstallPath']
+] as const;
 
 /**
  * Attempts to retrieve Steam's installation path from the Windows registry.
@@ -44,33 +52,27 @@ export const findSteamInstall = (): string | null => {
  * @returns A valid Steam installation path, or `null` if none could be found.
  */
 const findSteamPathFromRegistry = (): string | null => {
-    const registryLocations = [
-        ['HKCU\\Software\\Valve\\Steam', 'SteamPath'],
-        ['HKCU\\Software\\Valve\\Steam', 'SteamExe'],
-        ['HKLM\\Software\\Valve\\Steam', 'InstallPath'],
-        ['HKLM\\SOFTWARE\\WOW6432Node\\Valve\\Steam', 'InstallPath']
-    ] as const;
-
-    for (const [key, valueName] of registryLocations) {
+    for (const [key, valueName] of STEAM_REGISTRY_LOCATIONS) {
         try {
             const output = execFileSync('reg', ['query', key, '/v', valueName], {
                 encoding: 'utf8',
-                windowsHide: true
+                windowsHide: true,
+                stdio: ['ignore', 'pipe', 'ignore']
             });
-            const match = output.match(new RegExp(`${valueName}\\s+REG_\\w+\\s+(.+)`, 'i'));
 
-            if (!match?.[1]) {
+            const value = output.match(new RegExp(`${valueName}\\s+REG_\\w+\\s+(.+)`, 'i'))?.[1]?.trim();
+
+            if (!value) {
                 continue;
             }
 
-            const value = match?.[1]?.trim().replaceAll('/', '\\');
-            const steamPath = valueName === 'SteamExe' ? path.dirname(value) : value;
+            const steamPath = path.normalize(valueName === 'SteamExe' ? path.dirname(value) : value);
 
             if (fs.existsSync(path.join(steamPath, 'steam.exe'))) {
                 return resolveActualPath(steamPath);
             }
         } catch {
-            continue;
+            // --| Key/value missing, try the next location
         }
     }
 

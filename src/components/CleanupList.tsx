@@ -2,7 +2,7 @@ import { formatBytes, getCandidateLabel } from '../utils/utils';
 
 import type { CleanupCandidate } from '../../types/cleanup';
 
-interface CleanupListProps {
+export interface CleanupListProps {
     candidates: CleanupCandidate[];
     selectedIds: Set<string>;
     selectedType: string;
@@ -188,5 +188,3 @@ export const CleanupList = ({
         </section>
     );
 };
-
-export type { CleanupListProps };

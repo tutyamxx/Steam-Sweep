@@ -62,11 +62,7 @@ const scanGameInWorker = (game: SteamGame): Promise<CleanupCandidate[]> => {
 
         worker.once('message', (candidates: CleanupCandidate[]) => resolve(candidates));
         worker.once('error', reject);
-        worker.once('exit', (code) => {
-            if (code !== 0) {
-                reject(new Error(`Scanner worker stopped with exit code ${code}.`));
-            }
-        });
+        worker.once('exit', (code) => code !== 0 && reject(new Error(`Scanner worker stopped with exit code ${code}.`)));
     });
 };
 

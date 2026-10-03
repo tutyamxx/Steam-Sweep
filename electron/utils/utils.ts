@@ -26,37 +26,15 @@ export const getDirectorySize = (directoryPath: string): number | null => {
     let totalSize = 0;
 
     try {
-        const entries = fs.readdirSync(directoryPath, {
-            withFileTypes: true
-        });
-
-        for (const entry of entries) {
+        for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
             const entryPath = `${directoryPath}/${entry.name}`;
+            const size = entry.isDirectory() ? getDirectorySize(entryPath) : entry.isFile() ? getFileSize(entryPath) : 0;
 
-            if (entry.isSymbolicLink()) {
-                continue;
+            if (size === null) {
+                return null;
             }
 
-            if (entry.isDirectory()) {
-                const size = getDirectorySize(entryPath);
-
-                if (size === null) {
-                    return null;
-                }
-
-                totalSize += size;
-                continue;
-            }
-
-            if (entry.isFile()) {
-                const size = getFileSize(entryPath);
-
-                if (size === null) {
-                    return null;
-                }
-
-                totalSize += size;
-            }
+            totalSize += size;
         }
     } catch {
         return null;

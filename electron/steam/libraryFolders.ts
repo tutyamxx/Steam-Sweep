@@ -32,8 +32,7 @@ export const findSteamLibraries = (steamPath: string): SteamLibrary[] => {
         // --| Unreadable file: only the main Steam library is checked.
     }
 
-    const registeredPaths = Array.from(contents.matchAll(/"path"\s+"([^"]+)"/gi), (match) => match?.[1])
-        .filter((libraryPath): libraryPath is string => Boolean(libraryPath));
+    const registeredPaths = [...contents.matchAll(/"path"\s+"([^"]+)"/gi)].flatMap((match) => match[1] ?? []);
     const libraries = new Map<string, SteamLibrary>();
 
     for (const libraryPath of [steamPath, ...registeredPaths]) {

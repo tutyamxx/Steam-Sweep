@@ -6,6 +6,12 @@ import { TitleBar } from '../components/TitleBar';
 import { formatBytes } from '../utils/utils';
 import type { CleanupCandidate, CleanupResult } from '../../types/cleanup';
 
+/**
+ * Main SteamSweep screen.
+ *
+ * Handles scanning Steam libraries, selecting cleanup candidates,
+ * moving them to the Recycle Bin and showing app update prompts.
+ */
 export const Home = () => {
     const appRef = useRef<HTMLElement>(null);
 
@@ -32,6 +38,12 @@ export const Home = () => {
 
     const [selectedType, setSelectedType] = useState('');
 
+    /**
+     * Shows the "Back to top" button once the app container
+     * has been scrolled more than 400px down.
+     *
+     * The scroll listener is passive and is removed on unmount.
+     */
     useEffect(() => {
         const app = appRef.current;
 
@@ -50,6 +62,12 @@ export const Home = () => {
         };
     }, []);
 
+    /**
+     * Subscribes to auto-update events from the main process
+     * (available, progress, downloaded and error) and keeps the update modal state in sync.
+     *
+     * All subscriptions are removed on unmount.
+     */
     useEffect(() => {
         const offAvailable = window.steamSweep.onUpdateAvailable((version) => {
             setUpdateVersion(version);
@@ -84,6 +102,9 @@ export const Home = () => {
         };
     }, []);
 
+    /**
+     * Smoothly scrolls the app container back to the top.
+     */
     const scrollToTop = (): void => {
         appRef.current?.scrollTo({
             top: 0,
@@ -91,15 +112,29 @@ export const Home = () => {
         });
     };
 
+    /**
+     * Minimizes the application window.
+     */
     const handleMinimize = (): void => window.steamSweep.window.minimize();
+
+    /**
+     * Closes the application window.
+     */
     const handleClose = (): void => window.steamSweep.window.close();
 
+    /**
+     * Opens the detected Steam installation folder in the file explorer.
+     * Does nothing if Steam has not been found yet.
+     */
     const handleOpenSteamFolder = (): void => {
         if (steamPath) {
             window.steamSweep.window.openFolder(steamPath);
         }
     };
 
+    /**
+     * Starts downloading the available update and resets any previous download error or progress.
+     */
     const handleDownloadUpdate = (): void => {
         setUpdateError(false);
         setUpdateProgress(0);
@@ -108,6 +143,12 @@ export const Home = () => {
         window.steamSweep.downloadUpdate();
     };
 
+    /**
+     * Scans the Steam libraries for cleanup candidates.
+     *
+     * Replaces the current candidates and Steam path with the scan result,
+     * clears the selection and scrolls back to the top.
+     */
     const handleScan = async (): Promise<void> => {
         setIsScanning(true);
         setCleanupError(null);
@@ -126,6 +167,11 @@ export const Home = () => {
         }
     };
 
+    /**
+     * Toggles the selection of a single cleanup candidate.
+     *
+     * @param id - ID of the candidate to select or deselect.
+     */
     const toggleCandidate = (id: string): void => {
         setSelectedType('');
         setSelectedIds((current) => {
@@ -141,6 +187,14 @@ export const Home = () => {
         });
     };
 
+    /**
+     * Toggles the selection of every candidate belonging to a game.
+     *
+     * If all of the game's candidates are already selected they are
+     * deselected, otherwise they are all selected.
+     *
+     * @param gameCandidates - Candidates that belong to the game.
+     */
     const toggleGame = (gameCandidates: CleanupCandidate[]): void => {
         setSelectedType('');
         setSelectedIds((current) => {
@@ -159,6 +213,9 @@ export const Home = () => {
         });
     };
 
+    /**
+     * Selects every candidate, or clears the selection if all candidates are already selected.
+     */
     const toggleAll = (): void => {
         setSelectedType('');
         const allSelected = candidates.length > 0 && candidates.every((candidate) => selectedIds.has(candidate.id));
@@ -172,6 +229,10 @@ export const Home = () => {
         setSelectedIds(new Set(candidates.map((candidate) => candidate.id)));
     };
 
+    /**
+     * Opens the cleanup confirmation dialog for the selected candidates.
+     * Does nothing if nothing is selected or a cleanup is already running.
+     */
     const handleDeleteSelected = (): void => {
         const selectedCandidates = candidates.filter((candidate) => selectedIds.has(candidate.id));
 
@@ -183,11 +244,22 @@ export const Home = () => {
         setShowCleanupConfirm(true);
     };
 
+    /**
+     * Selects only the candidates of the given type.
+     *
+     * @param type - Candidate type to select (for example `log` or `temp-folder`).
+     */
     const selectAllByType = (type: CleanupCandidate['type']): void => {
         setSelectedType(type);
         setSelectedIds(new Set(candidates.filter((candidate) => candidate.type === type).map((candidate) => candidate.id)));
     };
 
+    /**
+     * Moves the selected candidates to the Recycle Bin.
+     *
+     * Successfully removed candidates are dropped from the list and the selection.
+     * If any item fails, an error message with the number of failed items (and the first error, when available) is shown.
+     */
     const handleConfirmCleanup = async (): Promise<void> => {
         const selectedCandidates = candidates.filter((candidate) => selectedIds.has(candidate.id));
 

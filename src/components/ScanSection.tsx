@@ -1,7 +1,7 @@
 import { formatBytes } from '../utils/utils';
 import { SteamSweepLogo } from './SteamSweepLogo';
 
-interface ScanProps {
+export interface ScanProps {
     totalSize: number;
     isScanning: boolean;
     steamPath: string | null;
@@ -95,5 +95,3 @@ export const ScanSection = ({
         </section>
     );
 };
-
-export type { ScanProps };
