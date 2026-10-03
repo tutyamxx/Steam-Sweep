@@ -9,7 +9,7 @@ import jsdoc from 'eslint-plugin-jsdoc';
 
 export default [
     {
-        ignores: ['node_modules/', 'dist/', 'dist-electron/', 'release/', 'build/']
+        ignores: ['node_modules/', 'dist/', 'dist-electron/', 'release/', 'build/', '.github/**', '**/*.yml', '**/*.yaml']
     },
     js.configs.recommended,
     ...tseslint.configs.recommended,
