@@ -26,7 +26,7 @@ import {
 /**
  * Describes how a matched entry is reported as a cleanup candidate.
  */
-interface RuleResult {
+interface CleanupRule {
     type: CleanupCandidate['type'];
     confidence: CleanupCandidate['confidence'];
     reason: string;
@@ -35,14 +35,14 @@ interface RuleResult {
 /**
  * A rule matched by exact key (file extension or directory name).
  */
-interface KeyedRule extends RuleResult {
+interface KeyedRule extends CleanupRule {
     keys: string[];
 }
 
 /**
  * A rule matched by regular expressions against the lowercase file name.
  */
-interface PatternRule extends RuleResult {
+interface PatternRule extends CleanupRule {
     patterns: RegExp[];
 }
 
@@ -52,40 +52,40 @@ interface PatternRule extends RuleResult {
  * @param subject - What was found, e.g. "Temporary file".
  * @returns       - Reason shown to the user.
  */
-const inGame = (subject: string): string => `${subject} inside a Steam game installation.`;
+const inGameReason = (subject: string): string => `${subject} inside a Steam game installation.`;
 
 /**
  * Compiles keyed rules into a Map for O(1) lookups.
  * Earlier rules win when the same key appears more than once.
  *
- * @param rules - Rules in priority order.
- * @returns     - Lookup table from key to rule result.
+ * @param keyedRules - Rules in priority order.
+ * @returns          - Lookup table from key to cleanup rule.
  */
-const buildLookup = (rules: KeyedRule[]): Map<string, RuleResult> => {
-    const lookup = new Map<string, RuleResult>();
+const buildLookup = (keyedRules: KeyedRule[]): Map<string, CleanupRule> => {
+    const rulesByKey = new Map<string, CleanupRule>();
 
-    for (const { keys, ...result } of rules) {
+    for (const { keys, ...rule } of keyedRules) {
         for (const key of keys) {
-            if (!lookup.has(key)) {
-                lookup.set(key, result);
+            if (!rulesByKey.has(key)) {
+                rulesByKey.set(key, rule);
             }
         }
     }
 
-    return lookup;
+    return rulesByKey;
 };
 
 const fileRulesByExtension = buildLookup([
-    { keys: temporaryExtensions, type: 'temp-file', confidence: 'safe', reason: inGame('Temporary file') },
-    { keys: crashDumpExtensions, type: 'crash-dump', confidence: 'safe', reason: inGame('Crash dump') },
-    { keys: logExtensions, type: 'log', confidence: 'review', reason: inGame('Log file') },
-    { keys: backupExtensions, type: 'backup', confidence: 'review', reason: inGame('Backup file') }
+    { keys: temporaryExtensions, type: 'temp-file', confidence: 'safe', reason: inGameReason('Temporary file') },
+    { keys: crashDumpExtensions, type: 'crash-dump', confidence: 'safe', reason: inGameReason('Crash dump') },
+    { keys: logExtensions, type: 'log', confidence: 'review', reason: inGameReason('Log file') },
+    { keys: backupExtensions, type: 'backup', confidence: 'review', reason: inGameReason('Backup file') }
 ]);
 
 const directoryRulesByName = buildLookup([
-    { keys: temporaryDirectoryNames, type: 'temp-folder', confidence: 'safe', reason: inGame('Temporary directory') },
-    { keys: logDirectoryNames, type: 'log', confidence: 'review', reason: inGame('Log directory') },
-    { keys: crashDirectoryNames, type: 'crash-dump', confidence: 'review', reason: inGame('Crash report directory') },
+    { keys: temporaryDirectoryNames, type: 'temp-folder', confidence: 'safe', reason: inGameReason('Temporary directory') },
+    { keys: logDirectoryNames, type: 'log', confidence: 'review', reason: inGameReason('Log directory') },
+    { keys: crashDirectoryNames, type: 'crash-dump', confidence: 'review', reason: inGameReason('Crash report directory') },
     { keys: installerDirectoryNames, type: 'installer', confidence: 'review', reason: 'Directory commonly used for installers or redistributables.' }
 ]);
 
@@ -94,34 +94,106 @@ const installerPatternRules: PatternRule[] = [
     { patterns: installerArchivePatterns, type: 'installer', confidence: 'review', reason: 'File appears to be a bundled installer or redistributable.' }
 ];
 
-const emptyFolderResult: RuleResult = {
+const emptyFolderRule: CleanupRule = {
     type: 'empty-folder',
     confidence: 'safe',
-    reason: inGame('Empty directory')
+    reason: inGameReason('Empty directory')
 };
 
 /**
  * Finds the cleanup rule for a file, cheapest checks first.
  *
- * @param lowerCaseName - Lowercase file name.
- * @returns             - Matching rule result, if any.
+ * @param lowerCaseFileName - Lowercase file name.
+ * @returns                 - Matching cleanup rule, if any.
  */
-const matchFile = (lowerCaseName: string): RuleResult | undefined => {
-    const extensionRule = fileRulesByExtension.get(path.extname(lowerCaseName));
+const matchFile = (lowerCaseFileName: string): CleanupRule | undefined => fileRulesByExtension.get(path.extname(lowerCaseFileName))
+    ?? installerPatternRules.find(({ patterns }) => patterns.some((pattern) => pattern.test(lowerCaseFileName)));
 
-    if (extensionRule) {
-        return extensionRule;
+/**
+ * Builds a cleanup candidate for a matched file or directory.
+ *
+ * @param game        - Game the entry belongs to.
+ * @param entryPath   - Absolute path to the entry.
+ * @param sizeInBytes - Entry size in bytes.
+ * @param rule        - Type, confidence and reason to report.
+ * @returns           - The cleanup candidate.
+ */
+const toCandidate = (game: SteamGame, entryPath: string, sizeInBytes: number, { type, confidence, reason }: CleanupRule): CleanupCandidate => ({
+    id: entryPath,
+    gameId: game.appId,
+    gameName: game.name,
+    path: entryPath,
+    type,
+    size: sizeInBytes,
+    confidence,
+    reason
+});
+
+/**
+ * Reads the entries of a directory.
+ *
+ * @param directoryPath - Absolute path to the directory.
+ * @returns             - The directory entries, or `null` if the directory cannot be read.
+ */
+const readEntries = (directoryPath: string): fs.Dirent[] | null => {
+    try {
+        return fs.readdirSync(directoryPath, {
+            withFileTypes: true
+        });
+    } catch {
+        return null;
     }
+};
 
-    for (const rule of installerPatternRules) {
-        for (const pattern of rule.patterns) {
-            if (pattern.test(lowerCaseName)) {
-                return rule;
+/**
+ * Scans already-read directory entries and appends matching ones to `candidates`.
+ *
+ * Files are reported when they match a rule. Directories are reported when they
+ * match a rule or are empty, otherwise they are scanned recursively.
+ * File sizes are only queried for entries that match a rule.
+ *
+ * @param game             - Game being scanned.
+ * @param directoryPath    - Absolute path to the directory the entries belong to.
+ * @param directoryEntries - Entries of the directory.
+ * @param candidates       - Result list that discovered candidates are appended to.
+ */
+const scanEntries = (game: SteamGame, directoryPath: string, directoryEntries: fs.Dirent[], candidates: CleanupCandidate[]): void => {
+    for (const entry of directoryEntries) {
+        const isFile = entry.isFile();
+
+        if (!isFile && !entry.isDirectory()) {
+            continue;
+        }
+
+        const entryPath = path.join(directoryPath, entry.name);
+        const lowerCaseEntryName = entry.name.toLowerCase();
+        const rule = isFile ? matchFile(lowerCaseEntryName) : directoryRulesByName.get(lowerCaseEntryName);
+
+        if (rule) {
+            const sizeInBytes = isFile ? getFileSize(entryPath) : getDirectorySize(entryPath);
+
+            if (sizeInBytes !== null) {
+                candidates.push(toCandidate(game, entryPath, sizeInBytes, rule));
             }
+
+            continue;
+        }
+
+        if (isFile) {
+            continue;
+        }
+
+        if (isDirectoryEmpty(entryPath) && !isDirectoryReadOnly(entryPath)) {
+            candidates.push(toCandidate(game, entryPath, 0, emptyFolderRule));
+            continue;
+        }
+
+        const childEntries = readEntries(entryPath);
+
+        if (childEntries) {
+            scanEntries(game, entryPath, childEntries, candidates);
         }
     }
-
-    return undefined;
 };
 
 /**
@@ -135,108 +207,11 @@ const matchFile = (lowerCaseName: string): RuleResult | undefined => {
  */
 export const scanGame = (game: SteamGame): CleanupCandidate[] => {
     const candidates: CleanupCandidate[] = [];
+    const rootEntries = readEntries(game.installPath);
 
-    /**
-     * Adds a cleanup candidate to the result list.
-     *
-     * @param candidatePath - Absolute path to the candidate.
-     * @param size          - Candidate size in bytes.
-     * @param result        - Type, confidence and reason to report.
-     */
-    const addCandidate = (candidatePath: string, size: number, { type, confidence, reason }: RuleResult): void => {
-        candidates.push({
-            id: candidatePath,
-            gameId: game.appId,
-            gameName: game.name,
-            path: candidatePath,
-            type,
-            size,
-            confidence,
-            reason
-        });
-    };
-
-    /**
-     * Processes a discovered file.
-     *
-     * @param fileName - Filename.
-     * @param filePath - Absolute path to the file.
-     */
-    const scanFileEntry = (fileName: string, filePath: string): void => {
-        const rule = matchFile(fileName.toLowerCase());
-
-        if (!rule) {
-            return;
-        }
-
-        const size = getFileSize(filePath);
-
-        if (size !== null) {
-            addCandidate(filePath, size, rule);
-        }
-    };
-
-    /**
-     * Processes a discovered directory: reports it if it matches a rule or is empty,
-     * otherwise recurses into it.
-     *
-     * @param directoryName - Directory name.
-     * @param directoryPath - Absolute path to the directory.
-     */
-    const scanDirectoryEntry = (directoryName: string, directoryPath: string): void => {
-        const rule = directoryRulesByName.get(directoryName.toLowerCase());
-
-        if (rule) {
-            const size = getDirectorySize(directoryPath);
-
-            if (size !== null) {
-                addCandidate(directoryPath, size, rule);
-            }
-
-            return;
-        }
-
-        if (isDirectoryEmpty(directoryPath) && !isDirectoryReadOnly(directoryPath)) {
-            addCandidate(directoryPath, 0, emptyFolderResult);
-
-            return;
-        }
-
-        scanDirectory(directoryPath);
-    };
-
-    /**
-     * Recursively scans a directory.
-     *
-     * @param directoryPath - Absolute path to the directory.
-     */
-    const scanDirectory = (directoryPath: string): void => {
-        let entries: fs.Dirent[];
-
-        try {
-            entries = fs.readdirSync(directoryPath, {
-                withFileTypes: true
-            });
-        } catch {
-            return;
-        }
-
-        for (const entry of entries) {
-            if (entry.isSymbolicLink()) {
-                continue;
-            }
-
-            const entryPath = directoryPath + path.sep + entry.name;
-
-            if (entry.isDirectory()) {
-                scanDirectoryEntry(entry.name, entryPath);
-            } else if (entry.isFile()) {
-                scanFileEntry(entry.name, entryPath);
-            }
-        }
-    };
-
-    scanDirectory(game.installPath);
+    if (rootEntries) {
+        scanEntries(game, game.installPath, rootEntries, candidates);
+    }
 
     return candidates;
 };

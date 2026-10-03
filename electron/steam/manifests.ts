@@ -16,6 +16,16 @@ export interface SteamManifest {
 }
 
 /**
+ * Reads the first quoted value for a key from a manifest's contents.
+ *
+ * @param contents     - Raw manifest file contents.
+ * @param key          - Manifest key to look up (for example `appid`).
+ * @param valuePattern - Regular expression source the value must match. Defaults to any non-empty text.
+ * @returns            The value, or `undefined` if the key is missing or the value does not match.
+ */
+const readField = (contents: string, key: string, valuePattern = '[^"]+'): string | undefined => contents.match(new RegExp(`"${key}"\\s+"(${valuePattern})"`))?.[1];
+
+/**
  * Finds and parses Steam application manifest files.
  *
  * Steam stores installed game information in files named
@@ -29,27 +39,18 @@ export const findSteamManifests = (steamAppsPath: string): SteamManifest[] => {
         return [];
     }
 
-    const files = fs.readdirSync(steamAppsPath);
-
-    return files
+    return fs.readdirSync(steamAppsPath)
         .filter((file) => file.startsWith('appmanifest_') && file.endsWith('.acf'))
-        .map((file) => {
-            const filePath = path.join(steamAppsPath, file);
-            const contents = fs.readFileSync(filePath, 'utf8');
+        .flatMap((file) => {
+            try {
+                const contents = fs.readFileSync(path.join(steamAppsPath, file), 'utf8');
+                const appId = readField(contents, 'appid', '\\d+');
+                const name = readField(contents, 'name');
+                const installDir = readField(contents, 'installdir');
 
-            const appIdMatch = contents.match(/"appid"\s+"(\d+)"/);
-            const nameMatch = contents.match(/"name"\s+"([^"]+)"/);
-            const installDirMatch = contents.match(/"installdir"\s+"([^"]+)"/);
-
-            if (!appIdMatch?.[1] || !nameMatch?.[1] || !installDirMatch?.[1]) {
-                return null;
+                return appId && name && installDir ? [{ appId: Number(appId), name, installDir }] : [];
+            } catch {
+                return [];
             }
-
-            return {
-                appId: Number(appIdMatch?.[1]),
-                name: nameMatch?.[1],
-                installDir: installDirMatch?.[1]
-            };
-        })
-        .filter((manifest): manifest is SteamManifest => manifest !== null);
+        });
 };

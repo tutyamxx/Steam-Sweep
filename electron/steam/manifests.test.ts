@@ -41,37 +41,31 @@ describe('findSteamManifests', () => {
 
         const result = findSteamManifests(steamAppsPath);
 
-        expect(result).toEqual([
-            {
-                appId: 123456,
-                name: 'Test Game',
-                installDir: 'Test Game'
-            }
-        ]);
+        expect(result).toEqual([{
+            appId: 123456,
+            name: 'Test Game',
+            installDir: 'Test Game'
+        }]);
         expect(mockedReadFileSync).toHaveBeenCalledWith(path.join(steamAppsPath, 'appmanifest_123456.acf'), 'utf8');
     });
 
     it('should find multiple valid Steam manifests', () => {
         mockedExistsSync.mockReturnValue(true);
         mockedReaddirSync.mockReturnValue(['appmanifest_123456.acf', 'appmanifest_789012.acf']);
-        mockedReadFileSync
-            .mockReturnValueOnce('"appid" "123456"\n"name" "Test Game"\n"installdir" "Test Game"')
+        mockedReadFileSync.mockReturnValueOnce('"appid" "123456"\n"name" "Test Game"\n"installdir" "Test Game"')
             .mockReturnValueOnce('"appid" "789012"\n"name" "Another Game"\n"installdir" "Another Game"');
 
         const result = findSteamManifests(steamAppsPath);
-
-        expect(result).toEqual([
-            {
-                appId: 123456,
-                name: 'Test Game',
-                installDir: 'Test Game'
-            },
-            {
-                appId: 789012,
-                name: 'Another Game',
-                installDir: 'Another Game'
-            }
-        ]);
+        expect(result).toEqual([{
+            appId: 123456,
+            name: 'Test Game',
+            installDir: 'Test Game'
+        },
+        {
+            appId: 789012,
+            name: 'Another Game',
+            installDir: 'Another Game'
+        }]);
     });
 
     it('should ignore files that are not Steam application manifests', () => {
@@ -80,14 +74,11 @@ describe('findSteamManifests', () => {
         mockedReadFileSync.mockReturnValue('"appid" "123456"\n"name" "Test Game"\n"installdir" "Test Game"');
 
         const result = findSteamManifests(steamAppsPath);
-
-        expect(result).toEqual([
-            {
-                appId: 123456,
-                name: 'Test Game',
-                installDir: 'Test Game'
-            }
-        ]);
+        expect(result).toEqual([{
+            appId: 123456,
+            name: 'Test Game',
+            installDir: 'Test Game'
+        }]);
         expect(mockedReadFileSync).toHaveBeenCalledTimes(1);
     });
 
@@ -97,7 +88,6 @@ describe('findSteamManifests', () => {
         mockedReadFileSync.mockReturnValue('"name" "Test Game"\n"installdir" "Test Game"');
 
         const result = findSteamManifests(steamAppsPath);
-
         expect(result).toEqual([]);
     });
 
@@ -107,7 +97,6 @@ describe('findSteamManifests', () => {
         mockedReadFileSync.mockReturnValue('"appid" "123456"\n"installdir" "Test Game"');
 
         const result = findSteamManifests(steamAppsPath);
-
         expect(result).toEqual([]);
     });
 
@@ -117,7 +106,6 @@ describe('findSteamManifests', () => {
         mockedReadFileSync.mockReturnValue('"appid" "123456"\n"name" "Test Game"');
 
         const result = findSteamManifests(steamAppsPath);
-
         expect(result).toEqual([]);
     });
 
@@ -127,7 +115,6 @@ describe('findSteamManifests', () => {
         mockedReadFileSync.mockReturnValueOnce('"appid" "123456"').mockReturnValueOnce('"name" "Another Game"');
 
         const result = findSteamManifests(steamAppsPath);
-
         expect(result).toEqual([]);
     });
 
@@ -137,14 +124,11 @@ describe('findSteamManifests', () => {
         mockedReadFileSync.mockReturnValue('"appid" "123456"\n"name" "Elden Ring"\n"installdir" "ELDEN RING"');
 
         const result = findSteamManifests(steamAppsPath);
-
-        expect(result).toEqual([
-            {
-                appId: 123456,
-                name: 'Elden Ring',
-                installDir: 'ELDEN RING'
-            }
-        ]);
+        expect(result).toEqual([{
+            appId: 123456,
+            name: 'Elden Ring',
+            installDir: 'ELDEN RING'
+        }]);
     });
 
     it('should parse an app ID as a number', () => {
@@ -176,5 +160,51 @@ describe('findSteamManifests', () => {
 
         expect(result).toEqual([]);
         expect(mockedReadFileSync).not.toHaveBeenCalled();
+    });
+
+    it('should skip a manifest with a non-numeric app ID', () => {
+        mockedExistsSync.mockReturnValue(true);
+        mockedReaddirSync.mockReturnValue(['appmanifest_123456.acf']);
+        mockedReadFileSync.mockReturnValue('"appid" "abc"\n"name" "Test Game"\n"installdir" "Test Game"');
+
+        const result = findSteamManifests(steamAppsPath);
+        expect(result).toEqual([]);
+    });
+
+    it('should skip a manifest with an empty value', () => {
+        mockedExistsSync.mockReturnValue(true);
+        mockedReaddirSync.mockReturnValue(['appmanifest_123456.acf']);
+        mockedReadFileSync.mockReturnValue('"appid" "123456"\n"name" ""\n"installdir" "Test Game"');
+
+        const result = findSteamManifests(steamAppsPath);
+        expect(result).toEqual([]);
+    });
+
+    it('should parse tab-separated manifest values', () => {
+        mockedExistsSync.mockReturnValue(true);
+        mockedReaddirSync.mockReturnValue(['appmanifest_123456.acf']);
+        mockedReadFileSync.mockReturnValue('"appid"\t\t"123456"\n"name"\t\t"Test Game"\n"installdir"\t\t"Test Game"');
+
+        const result = findSteamManifests(steamAppsPath);
+        expect(result).toEqual([{
+            appId: 123456,
+            name: 'Test Game',
+            installDir: 'Test Game'
+        }]);
+    });
+
+    it('should skip a manifest that cannot be read and still load the others', () => {
+        mockedExistsSync.mockReturnValue(true);
+        mockedReaddirSync.mockReturnValue(['appmanifest_123456.acf', 'appmanifest_789012.acf']);
+        mockedReadFileSync.mockImplementationOnce(() => {
+            throw new Error('EBUSY: resource busy or locked');
+        }).mockReturnValueOnce('"appid" "789012"\n"name" "Another Game"\n"installdir" "Another Game"');
+
+        const result = findSteamManifests(steamAppsPath);
+        expect(result).toEqual([{
+            appId: 789012,
+            name: 'Another Game',
+            installDir: 'Another Game'
+        }]);
     });
 });

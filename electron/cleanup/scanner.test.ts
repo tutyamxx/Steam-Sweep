@@ -31,6 +31,8 @@ describe('scanGame', () => {
     let game: SteamGame;
 
     beforeEach(() => {
+        jest.clearAllMocks();
+
         temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'steam-sweep-'));
         gamePath = path.join(temporaryDirectory, 'Test Game');
         fs.mkdirSync(gamePath);
@@ -44,11 +46,18 @@ describe('scanGame', () => {
 
         mockedGetDirectorySize.mockReturnValue(0);
         mockedGetFileSize.mockImplementation((filePath) => fs.statSync(filePath).size);
-        mockedIsDirectoryEmpty.mockImplementation((directoryPath) => fs.readdirSync(directoryPath).length === 0);
+        mockedIsDirectoryEmpty.mockImplementation((directoryPath) => {
+            try {
+                return fs.readdirSync(directoryPath).length === 0;
+            } catch {
+                return false;
+            }
+        });
         mockedIsDirectoryReadOnly.mockReturnValue(false);
     });
 
     afterEach(() => {
+        jest.restoreAllMocks();
         fs.rmSync(temporaryDirectory, { recursive: true, force: true });
     });
 
@@ -200,12 +209,63 @@ describe('scanGame', () => {
 
     it('should not detect a read-only empty directory', () => {
         const directoryPath = path.join(gamePath, 'readonly');
+
         fs.mkdirSync(directoryPath);
-        mockedIsDirectoryReadOnly.mockImplementation((directoryPath) => directoryPath === directoryPath);
+        mockedIsDirectoryReadOnly.mockImplementation((candidatePath) => candidatePath === directoryPath);
+
+        const candidates = scanGame(game);
+        expect(candidates).toEqual([]);
+    });
+
+    it('should only report the innermost empty directory', () => {
+        const directoryPath = path.join(gamePath, 'data', 'empty');
+        fs.mkdirSync(directoryPath, { recursive: true });
 
         const candidates = scanGame(game);
 
-        expect(candidates).toEqual([]);
+        expect(candidates).toHaveLength(1);
+        expect(candidates[0]).toMatchObject({
+            path: directoryPath,
+            type: 'empty-folder'
+        });
+    });
+
+    it('should not detect a directory that only contains unrelated files', () => {
+        const directoryPath = path.join(gamePath, 'data');
+
+        fs.mkdirSync(directoryPath);
+        fs.writeFileSync(path.join(directoryPath, 'level.dat'), 'level data');
+
+        expect(scanGame(game)).toEqual([]);
+    });
+
+    it('should only check the read-only attribute of empty directories', () => {
+        const directoryPath = path.join(gamePath, 'data');
+
+        fs.mkdirSync(directoryPath);
+        fs.writeFileSync(path.join(directoryPath, 'level.dat'), 'level data');
+
+        scanGame(game);
+
+        expect(mockedIsDirectoryReadOnly).not.toHaveBeenCalled();
+    });
+
+    it('should skip directories that cannot be read', () => {
+        const dataPath = path.join(gamePath, 'data');
+        const readdirSync = fs.readdirSync;
+
+        fs.mkdirSync(dataPath);
+        fs.writeFileSync(path.join(dataPath, 'cache.tmp'), 'temporary data');
+
+        jest.spyOn(fs, 'readdirSync').mockImplementation(((target: fs.PathLike, options: never) => {
+            if (target === dataPath) {
+                throw new Error('EACCES: permission denied');
+            }
+
+            return readdirSync(target, options);
+        }) as unknown as typeof fs.readdirSync);
+
+        expect(scanGame(game)).toEqual([]);
     });
 
     it('should recursively scan nested directories', () => {
